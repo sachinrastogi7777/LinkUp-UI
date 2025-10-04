@@ -1,6 +1,7 @@
 import React from 'react'
 import NavBar from './NavBar'
 import { Outlet } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
 
 const Body = () => {
     return (
@@ -9,6 +10,7 @@ const Body = () => {
             <main className='flex-grow'>
                 <Outlet />
             </main>
+            <ToastContainer />
         </div>
     )
 }
