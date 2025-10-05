@@ -1,203 +1,241 @@
 import React from 'react';
-import { Heart, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Github, MessageCircle, Info, Shield, FileText, HelpCircle, Users, Sparkles } from 'lucide-react';
+import { Heart, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Github, MessageCircle, Info, Shield, FileText, HelpCircle, Users, Sparkles, Send, Copyright } from 'lucide-react';
 import logo from '../assets/linkup-icon.png'
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
     const userData = useSelector((store) => store.user);
     const userLoggedIn = userData ? true : false;
     const currentYear = new Date().getFullYear();
+
+    const footerLinks = {
+        company: [
+            { name: 'About Us', path: '/about' },
+            { name: 'Careers', path: '/careers' },
+            { name: 'Press', path: '/press' },
+            { name: 'Blog', path: '/blog' }
+        ],
+        support: [
+            { name: 'Help Center', path: '/help' },
+            { name: 'Safety Tips', path: '/safety' },
+            { name: 'Contact Us', path: '/contact' },
+            { name: 'FAQs', path: '/faq' }
+        ],
+        legal: [
+            { name: 'Privacy Policy', path: '/privacy' },
+            { name: 'Terms of Service', path: '/terms' },
+            { name: 'Cookie Policy', path: '/cookies' },
+            { name: 'Community Guidelines', path: '/guidelines' }
+        ],
+        community: [
+            { name: 'Success Stories', path: '/stories' },
+            { name: 'Events', path: '/events' },
+            { name: 'Developer Forum', path: '/forum' },
+            { name: 'Partnerships', path: '/partners' }
+        ]
+    };
+
+    const socialLinks = [
+        { icon: Facebook, url: 'https://facebook.com', label: 'Facebook' },
+        { icon: Twitter, url: 'https://twitter.com', label: 'Twitter' },
+        { icon: Instagram, url: 'https://instagram.com', label: 'Instagram' },
+        { icon: Linkedin, url: 'https://linkedin.com', label: 'LinkedIn' },
+    ];
+
     if (!userLoggedIn) {
         return (
-            <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white">
-                <div className="max-w-7xl mx-auto px-6 py-12">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="w-20 flex items-center justify-center">
+            <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
+                {/* Newsletter Section */}
+                <div className="border-b border-white border-opacity-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="text-center md:text-left">
+                                <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    Stay Connected
+                                </h3>
+                                <p className="text-gray-300 text-sm">
+                                    Get the latest updates, tips, and exclusive offers
+                                </p>
+                            </div>
+                            <div className="flex w-full md:w-auto max-w-md">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="flex-1 px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-l-full focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400 backdrop-blur-sm"
+                                />
+                                <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-r-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2">
+                                    <Send className="w-4 h-4" />
+                                    Subscribe
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Footer Content */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+                        {/* Brand Section */}
+                        <div className="lg:col-span-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-10 h-10 flex items-center justify-center">
                                     <img
                                         src={logo}
                                         alt="LinkUp Logo"
                                         className='logo-rotate'
                                     />
                                 </div>
-                                <h3 className="text-2xl font-bold">Link Up</h3>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Link Up</span>
                             </div>
-                            <p className="text-gray-300 text-sm leading-relaxed">
+                            <p className="text-gray-300 text-sm mb-6 leading-relaxed">
                                 Connect, share, and grow with a community that cares. Join thousands of users building meaningful relationships every day.
                             </p>
-                            <div className="flex gap-3 mt-4">
-                                <a href="#" className="w-10 h-10 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Twitter className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Facebook className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Instagram className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Linkedin className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Github className="w-5 h-5" />
-                                </a>
+
+                            {/* Contact Info */}
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 text-gray-300 text-sm">
+                                    <Mail className="w-4 h-4 text-purple-400" />
+                                    <span>support@devtinder.com</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-gray-300 text-sm">
+                                    <Phone className="w-4 h-4 text-purple-400" />
+                                    <span>+1 (555) 123-4567</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-gray-300 text-sm">
+                                    <MapPin className="w-4 h-4 text-purple-400" />
+                                    <span>San Francisco, CA</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Quick Links */}
+                        {/* Links Sections */}
                         <div>
-                            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <Info className="w-5 h-5" />
-                                Quick Links
-                            </h4>
+                            <h4 className="text-lg font-semibold mb-4 text-white">Company</h4>
                             <ul className="space-y-2">
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-pink-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        About Us
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-pink-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Features
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-pink-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Blog
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-pink-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Careers
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-pink-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Press Kit
-                                    </a>
-                                </li>
+                                {footerLinks.company.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            to={link.path}
+                                            className="text-gray-300 hover:text-purple-400 transition-colors text-sm"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        {/* Support */}
                         <div>
-                            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <HelpCircle className="w-5 h-5" />
-                                Support
-                            </h4>
+                            <h4 className="text-lg font-semibold mb-4 text-white">Support</h4>
                             <ul className="space-y-2">
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-purple-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Help Center
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-purple-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Community Guidelines
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-purple-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Safety Center
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-purple-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Report Abuse
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group">
-                                        <span className="w-1 h-1 bg-purple-400 rounded-full group-hover:w-2 transition-all"></span>
-                                        Contact Support
-                                    </a>
-                                </li>
+                                {footerLinks.support.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            to={link.path}
+                                            className="text-gray-300 hover:text-purple-400 transition-colors text-sm"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        {/* Contact Info */}
                         <div>
-                            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <MessageCircle className="w-5 h-5" />
-                                Get in Touch
-                            </h4>
-                            <ul className="space-y-3">
-                                <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                    <Mail className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-white font-medium">Email</p>
-                                        <a href="mailto:support@socialhub.com" className="hover:text-pink-400 transition-colors">
-                                            support@socialhub.com
-                                        </a>
-                                    </div>
-                                </li>
-                                <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                    <Phone className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-white font-medium">Phone</p>
-                                        <a href="tel:+15551234567" className="hover:text-pink-400 transition-colors">
-                                            +1 (555) 123-4567
-                                        </a>
-                                    </div>
-                                </li>
-                                <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                    <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-white font-medium">Address</p>
-                                        <p>123 Social Street<br />San Francisco, CA 94102</p>
-                                    </div>
-                                </li>
+                            <h4 className="text-lg font-semibold mb-4 text-white">Legal</h4>
+                            <ul className="space-y-2">
+                                {footerLinks.legal.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            to={link.path}
+                                            className="text-gray-300 hover:text-purple-400 transition-colors text-sm"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="text-lg font-semibold mb-4 text-white">Community</h4>
+                            <ul className="space-y-2">
+                                {footerLinks.community.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            to={link.path}
+                                            className="text-gray-300 hover:text-purple-400 transition-colors text-sm"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     </div>
 
-                    {/* Newsletter Section */}
-                    <div className="border-t border-white border-opacity-10 pt-8 mb-8">
-                        <div className="max-w-2xl mx-auto text-center">
-                            <h4 className="text-xl font-semibold mb-2">Stay Updated</h4>
-                            <p className="text-gray-300 text-sm mb-4">Subscribe to our newsletter for the latest updates and features</p>
-                            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-                                <input
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    className="flex-1 px-4 py-2 rounded-full bg-white bg-opacity-10 border border-white border-opacity-20 focus:outline-none focus:border-pink-400 text-white placeholder-gray-400"
-                                />
-                                <button className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                    Subscribe
+                    {/* Social Links */}
+                    <div className="mt-12 pt-8 border-t border-white border-opacity-10">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                {socialLinks.map((social) => {
+                                    const Icon = social.icon;
+                                    return (
+                                        <Link
+                                            key={social.label}
+                                            to={social.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={social.label}
+                                            className="w-10 h-10 bg-black bg-opacity-10 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 transition-all duration-300 hover:scale-110"
+                                        >
+                                            <Icon className="w-5 h-5" />
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="text-center md:text-right">
+                                <div className="flex items-center justify-center md:justify-end gap-4 text-gray-400 text-sm">
+                                    <span className="flex items-center gap-2">
+                                        <Copyright className="w-4 h-4" />
+                                        <span>LinkUp {currentYear}</span>
+                                    </span>
+                                    <span className="hidden sm:inline">All rights reserved.</span>
+                                </div>
+                                <p className="text-gray-300 text-xs mt-1 flex items-center justify-center md:justify-end gap-1">
+                                    Made with <Heart className="w-3 h-3 text-pink-500" /> for creators, by creators.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* App Download Section (Optional) */}
+                    <div className="mt-8 pt-8 border-t border-white border-opacity-10">
+                        <div className="text-center">
+                            <p className="text-gray-300 mb-4 text-sm">Download our mobile app</p>
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <button className="flex items-center cursor-pointer gap-3 px-6 py-3 bg-black bg-opacity-10 rounded-xl hover:bg-opacity-20 transition-all duration-300 border border-white border-opacity-20 backdrop-blur-sm">
+                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                                    </svg>
+                                    <div className="text-left">
+                                        <p className="text-xs text-gray-400">Download on the</p>
+                                        <p className="text-sm font-semibold">App Store</p>
+                                    </div>
+                                </button>
+                                <button className="flex items-center cursor-pointer gap-3 px-6 py-3 bg-black bg-opacity-10 rounded-xl hover:bg-opacity-20 transition-all duration-300 border border-white border-opacity-20 backdrop-blur-sm">
+                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
+                                    </svg>
+                                    <div className="text-left">
+                                        <p className="text-xs text-gray-400">Get it on</p>
+                                        <p className="text-sm font-semibold">Google Play</p>
+                                    </div>
                                 </button>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Bottom Bar */}
-                    <div className="border-t border-white border-opacity-10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
-                            <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
-                                <FileText className="w-4 h-4" />
-                                Privacy Policy
-                            </a>
-                            <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
-                                <Shield className="w-4 h-4" />
-                                Terms of Service
-                            </a>
-                            <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
-                                <FileText className="w-4 h-4" />
-                                Cookie Policy
-                            </a>
-                        </div>
-                        <p className="text-gray-300 text-sm flex items-center gap-1">
-                            Made with <Heart className="w-4 h-4 text-pink-400 fill-current" /> Link Up {currentYear}
-                        </p>
                     </div>
                 </div>
             </footer>
@@ -208,14 +246,14 @@ const Footer = () => {
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 flex items-center justify-center">
+                            <div className="w-10 h-10 flex items-center justify-center">
                                 <img
                                     src={logo}
                                     alt="LinkUp Logo"
                                     className='logo-rotate'
                                 />
                             </div>
-                            <span className="text-lg font-bold">Link Up</span>
+                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Link Up</span>
                         </div>
 
                         {/* Quick Links */}
@@ -240,18 +278,22 @@ const Footer = () => {
 
                         {/* Social & Copyright */}
                         <div className="flex items-center gap-4">
-                            <div className="flex gap-2">
-                                <a href="#" className="w-8 h-8 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Twitter className="w-4 h-4" />
-                                </a>
-                                <a href="#" className="w-8 h-8 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Instagram className="w-4 h-4" />
-                                </a>
-                                <a href="#" className="w-8 h-8 bg-white text-purple-500 bg-opacity-10 hover:bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
-                                    <Linkedin className="w-4 h-4" />
-                                </a>
-                            </div>
-                            <span className="text-gray-200 text-sm hidden md:block">{currentYear}</span>
+                            {socialLinks.map((social) => {
+                                const Icon = social.icon;
+                                return (
+                                    <Link
+                                        key={social.label}
+                                        to={social.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label={social.label}
+                                        className="w-10 h-10 bg-black bg-opacity-10 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 transition-all duration-300 hover:scale-110"
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                    </Link>
+                                );
+                            })}
+                            <span className="text-gray-200 text-sm hidden md:flex items-center gap-2"><Copyright className="w-4 h-4" /> <span>{currentYear}</span></span>
                         </div>
                     </div>
                 </div>

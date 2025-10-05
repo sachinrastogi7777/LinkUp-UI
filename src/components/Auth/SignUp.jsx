@@ -152,7 +152,7 @@ const SignUp = () => {
                         pauseOnHover: false,
                         draggable: false,
                     });
-                }, 2500);
+                }, 2000);
             }
         } catch (error) {
             console.log(error);
@@ -166,7 +166,7 @@ const SignUp = () => {
             });
             setTimeout(() => {
                 setCreateLoading(false);
-            }, 3000)
+            }, 2000)
         }
     };
 
@@ -322,8 +322,7 @@ const SignUp = () => {
                                         type="date"
                                         value={formData.dateOfBirth}
                                         onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
-                                            }`}
+                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'}`}
                                     />
                                 </div>
                                 {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
@@ -358,7 +357,7 @@ const SignUp = () => {
                                         onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
                                         className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.mobileNumber ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
-                                        placeholder="+1 (555) 123-4567"
+                                        placeholder="+91 (555) 444-2222"
                                     />
                                 </div>
                                 {errors.mobileNumber && <p className="text-red-500 text-sm mt-1">{errors.mobileNumber}</p>}

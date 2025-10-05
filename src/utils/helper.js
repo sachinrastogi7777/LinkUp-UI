@@ -1,6 +1,14 @@
 import axios from "axios";
 import { BASE_URL } from "./constants";
 
+const formattedDate = (date) => {
+    return new Date(date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+}
+
 // Upload Image to Server
 const uploadImageToServer = async (file, type) => {
     const formData = new FormData();
@@ -15,4 +23,4 @@ const uploadImageToServer = async (file, type) => {
     return response.data.imageUrl;
 }
 
-export { uploadImageToServer };
+export { formattedDate, uploadImageToServer };

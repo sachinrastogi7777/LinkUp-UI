@@ -1,10 +1,46 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import NavBar from './NavBar'
-import { Outlet } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { toast, ToastContainer } from 'react-toastify'
 import Footer from './Footer'
+import { addUser } from '../utils/slice/userSlice'
+import axios from 'axios'
+import { BASE_URL } from '../utils/constants'
+import { useDispatch } from 'react-redux'
 
 const Body = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const dispatch = useDispatch();
+    useEffect(() => {
+        const publicRoutes = ['/login', '/signup', '/reset-password'];
+        const isPublicRoute = publicRoutes.includes(location.pathname);
+
+        if (isPublicRoute) {
+            return;
+        }
+        const fetchUser = async () => {
+            try {
+                const res = await axios.get(BASE_URL + '/profile/view', { withCredentials: true });
+                dispatch(addUser(res.data));
+            }
+            catch (error) {
+                if (error.status === 401) {
+                    toast.error('Session expired. Please log in again.', {
+                        position: 'top-center',
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: false,
+                        progress: undefined,
+                    });
+                    navigate('/login');
+                }
+            }
+        };
+        fetchUser();
+    }, [dispatch, navigate, location.pathname])
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
             <NavBar />
@@ -17,4 +53,4 @@ const Body = () => {
     )
 }
 
-export default Body
+export default Body;
