@@ -4,6 +4,7 @@ import Body from "./components/Body";
 import Login from "./components/Auth/Login";
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
+import SignUp from "./components/Auth/SignUp";
 
 function App() {
 	return (
@@ -12,6 +13,7 @@ function App() {
 				<Routes>
 					<Route path='/' element={<Body />} >
 						<Route path='/login' element={<Login />} />
+						<Route path='/signup' element={<SignUp />} />
 					</Route>
 				</Routes>
 			</BrowserRouter>

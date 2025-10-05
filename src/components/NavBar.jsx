@@ -22,7 +22,7 @@ const NavBar = () => {
     }
 
     return (
-        <div className="navbar bg-base-300 shadow-sm px-4">
+        <div className="navbar bg-gradient-to-bl from-gray-900 via-purple-900 to-pink-900 shadow-sm px-4">
             <div className="flex-1 items-center gap-2">
                 <Link to='/'>
                     <img
