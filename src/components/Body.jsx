@@ -6,17 +6,18 @@ import Footer from './Footer'
 import { addUser } from '../utils/slice/userSlice'
 import axios from 'axios'
 import { BASE_URL } from '../utils/constants'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 const Body = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
+    const userData = useSelector((store) => store.user);
     useEffect(() => {
         const publicRoutes = ['/login', '/signup', '/reset-password'];
         const isPublicRoute = publicRoutes.includes(location.pathname);
 
-        if (isPublicRoute) {
+        if (isPublicRoute || userData) {
             return;
         }
         const fetchUser = async () => {
@@ -40,7 +41,7 @@ const Body = () => {
             }
         };
         fetchUser();
-    }, [dispatch, navigate, location.pathname])
+    }, [dispatch, navigate, location.pathname, userData])
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
             <NavBar />
