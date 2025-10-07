@@ -15,6 +15,7 @@ const NavBar = () => {
     const handleLogOut = async () => {
         try {
             await axios.post(BASE_URL + '/logout', {}, { withCredentials: true });
+            localStorage.setItem('manualLogout', 'true');
             dispatch(removeUser());
             dispatch(removeConnection());
             navigate('/login');

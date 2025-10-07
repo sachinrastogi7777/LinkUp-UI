@@ -27,15 +27,19 @@ const Body = () => {
             }
             catch (error) {
                 if (error.status === 401) {
-                    toast.error('Session expired. Please log in again.', {
-                        position: 'top-center',
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: false,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                    });
+                    const manualLogout = localStorage.getItem('manualLogout');
+                    if (!manualLogout) {
+                        toast.error('Session expired. Please log in again.', {
+                            position: 'top-center',
+                            autoClose: 2000,
+                            hideProgressBar: false,
+                            closeOnClick: false,
+                            pauseOnHover: true,
+                            draggable: false,
+                            progress: undefined,
+                        });
+                    }
+                    localStorage.removeItem('manualLogout');
                     navigate('/login');
                 }
             }

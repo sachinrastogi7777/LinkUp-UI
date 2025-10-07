@@ -6,12 +6,13 @@ import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import ProfileShimmer from '../Shimmer/ProfileShimmer';
 import ConnectionShimmer from '../Shimmer/ConnectionShimmer';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addConnection } from '../../utils/slice/connectionSlice';
 import { addUser } from '../../utils/slice/userSlice';
 
 const UserProfile = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const userData = useSelector((store) => store.user);
     const connectionList = useSelector((store) => store.connection);
     const [isLoadingConnections, setIsLoadingConnections] = useState(true);
@@ -54,7 +55,7 @@ const UserProfile = () => {
     useEffect(() => {
         setIsProfileLoading(false);
         userConnections();
-    }, [])
+    }, [userData])
 
     return (
         <div className="relative z-10 max-w-6xl mx-auto p-6">
