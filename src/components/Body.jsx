@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import NavBar from './NavBar'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { toast, ToastContainer } from 'react-toastify'
@@ -13,6 +13,19 @@ const Body = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const userData = useSelector((store) => store.user);
+    const receivedRequestsList = useSelector((store) => store.request);
+    const sentRequestsList = useSelector((store) => store.sentRequest);
+    const [receivedRequestsLength, setReceivedRequestsLength] = useState(receivedRequestsList?.length || 0);
+    const [sentRequestsLength, setSentRequestsLength] = useState(sentRequestsList?.length || 0);
+
+    useEffect(() => {
+        setReceivedRequestsLength(receivedRequestsList?.length || 0);
+    }, [receivedRequestsList]);
+
+    useEffect(() => {
+        setSentRequestsLength(sentRequestsList?.length || 0);
+    }, [sentRequestsList]);
+
     useEffect(() => {
         const publicRoutes = ['/login', '/signup', '/reset-password'];
         const isPublicRoute = publicRoutes.includes(location.pathname);
@@ -48,7 +61,9 @@ const Body = () => {
     }, [dispatch, navigate, location.pathname, userData])
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
-            <NavBar />
+            <NavBar
+                totalRequests={receivedRequestsLength + sentRequestsLength}
+            />
             <main className='flex-grow'>
                 <Outlet />
             </main>

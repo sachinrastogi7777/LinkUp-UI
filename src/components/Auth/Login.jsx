@@ -6,6 +6,8 @@ import { BASE_URL } from '../../utils/constants';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../../utils/slice/userSlice';
 import { toast } from 'react-toastify';
+import { addRequests } from '../../utils/slice/requestSlice';
+import { addSentRequests } from '../../utils/slice/sentRequestSlice';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -57,6 +59,11 @@ const Login = () => {
 
             if (response.data) {
                 dispatch(addUser(response.data));
+                const receivedRequestsData = await axios.get(BASE_URL + '/user/requests/received', { withCredentials: true });
+                dispatch(addRequests(receivedRequestsData?.data?.data));
+
+                const sentRequestsData = await axios.get(BASE_URL + '/user/requests/sent', { withCredentials: true });
+                dispatch(addSentRequests(sentRequestsData?.data?.data));
                 toast.success('Welcome back! 🎉', {
                     position: 'top-center',
                     autoClose: 2000,

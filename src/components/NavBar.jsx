@@ -6,11 +6,15 @@ import axios from 'axios';
 import { BASE_URL } from '../utils/constants';
 import { removeUser } from '../utils/slice/userSlice';
 import { removeConnection } from '../utils/slice/connectionSlice';
+import { removeRequest } from '../utils/slice/requestSlice';
+import { removeSentRequest } from '../utils/slice/sentRequestSlice';
+import { removeFeed } from '../utils/slice/feedSlice';
 
-const NavBar = () => {
+const NavBar = ({ totalRequests }) => {
     const userData = useSelector((store) => store.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const currentPath = window.location.pathname;
 
     const handleLogOut = async () => {
         try {
@@ -18,6 +22,10 @@ const NavBar = () => {
             localStorage.setItem('manualLogout', 'true');
             dispatch(removeUser());
             dispatch(removeConnection());
+            dispatch(removeRequest());
+            dispatch(removeSentRequest());
+            dispatch(removeFeed());
+            localStorage.removeItem('requestState');
             navigate('/login');
         } catch (error) {
             console.log(error)
@@ -37,7 +45,9 @@ const NavBar = () => {
             </div>
             {userData &&
                 <div className="flex gap-2 items-center ml-auto">
-                    <button className="btn btn-primary">{`Requests ()`}</button>
+                    {currentPath !== '/requests' && (
+                        <button onClick={() => navigate('/requests')} className="btn btn-primary">{`Requests (${totalRequests})`}</button>
+                    )}
                     <p className='flex items-center px-2.5'>{`Welcome, ${userData.firstName}`}</p>
                     <div className="dropdown dropdown-end mx-5">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
