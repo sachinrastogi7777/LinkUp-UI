@@ -8,7 +8,7 @@ import { calculateAge } from '../../utils/helper';
 import { MapPin } from 'lucide-react';
 import ProfileModal from '../Profile/ProfileModal';
 
-const UserCard = ({ user, isPremium = true }) => {
+const UserCard = ({ user, isPremium = false }) => {
     const dispatch = useDispatch();
     const { firstName, lastName, dateOfBirth, gender, about, profileImage, location } = user;
     const age = calculateAge(dateOfBirth);
@@ -262,6 +262,7 @@ const UserCard = ({ user, isPremium = true }) => {
                 user={user}
                 isPremium={isPremium}
                 onAction={handleClick}
+                clickFrom='Feed'
             />
         </>
     )

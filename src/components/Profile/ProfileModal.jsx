@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Cake, Calendar, Loader2, Lock, MapPin, Users, X } from 'lucide-react';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import { formattedDate, getTimeAgo } from '../../utils/helper';
 import ConnectionShimmer from '../Shimmer/ConnectionShimmer';
 
-const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction }) => {
+const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction, clickFrom, requestId }) => {
     const [connectionList, setConnectionList] = useState([]);
     const [isLoadingConnections, setIsLoadingConnections] = useState(true);
     const { firstName, lastName, dateOfBirth, gender, about, profileImage, userName, interests, location, createdAt, coverImage, _id } = user;
@@ -34,7 +35,7 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction }) => {
     const formatedDOB = formattedDate(dateOfBirth);
     const joinDate = formattedDate(createdAt);
 
-    return (
+    const modalContent = (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4"
             onClick={onClose}
@@ -128,42 +129,43 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction }) => {
                             {isPremium ? (
                                 isLoadingConnections ? (
                                     <ConnectionShimmer />
-                                ) :
-                                    connectionList && connectionList.length > 0 ? (
-                                        <div className="space-y-3">
-                                            {connectionList.map((connection, index) => {
-                                                const calculateTimeDiff = getTimeAgo(connection.connectedAt);
-                                                return (
-                                                    <div
-                                                        key={connection.connectionId}
-                                                        className="flex justify-between items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:translate-x-2 opacity-0 animate-fadeInUp"
-                                                        style={{
-                                                            animation: `fadeInUp 0.5s ease-out forwards`,
-                                                            animationDelay: `${index * 0.1}s`
-                                                        }}
-                                                    >
-                                                        <div className='flex items-center gap-3'>
-                                                            <div className="relative">
-                                                                <img
-                                                                    src={connection.user.profileImage}
-                                                                    alt='Profile Pic'
-                                                                    className="w-10 h-10 rounded-full object-cover"
-                                                                />
-                                                            </div>
+                                ) : connectionList && connectionList.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {connectionList.map((connection, index) => {
+                                            const calculateTimeDiff = getTimeAgo(connection.connectedAt);
+                                            return (
+                                                <div
+                                                    key={connection.connectionId}
+                                                    className="flex justify-between items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:translate-x-2 opacity-0 animate-fadeInUp"
+                                                    style={{
+                                                        animation: `fadeInUp 0.5s ease-out forwards`,
+                                                        animationDelay: `${index * 0.1}s`
+                                                    }}
+                                                >
+                                                    <div className='flex items-center gap-3'>
+                                                        <div className="relative">
+                                                            <img
+                                                                src={connection.user.profileImage}
+                                                                alt='Profile Pic'
+                                                                className="w-10 h-10 rounded-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col">
                                                             <span className="font-medium text-gray-700">{`${connection.user.firstName} ${connection.user.lastName}`}</span>
-                                                            <span className="font-medium text-gray-700">{`@${connection.user.userName}`}</span>
-                                                            <span className='text-black justify-end mx-8'>{`Connected Since, ${calculateTimeDiff}`}</span>
+                                                            <span className="text-sm text-gray-500">{`@${connection.user.userName}`}</span>
                                                         </div>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8">
-                                            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-gray-500 font-medium">User don't have any connections.</p>
-                                        </div>
-                                    )
+                                                    <div className='text-sm text-gray-500'>{`Connected Since ${calculateTimeDiff}`}</div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                        <p className="text-gray-500 font-medium">User don't have any connections.</p>
+                                    </div>
+                                )
                             ) : (
                                 <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 p-8 text-center">
                                     <div className="absolute inset-0 backdrop-blur-md bg-white/30"></div>
@@ -196,30 +198,58 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction }) => {
                         </div>
 
                         <div className="flex gap-4 mt-6">
-                            <button
-                                className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
-                                onClick={() => {
-                                    onAction('ignored', user._id);
-                                    onClose();
-                                }}
-                            >
-                                Ignore
-                            </button>
-                            <button
-                                className="flex-1 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
-                                onClick={() => {
-                                    onAction('interested', user._id);
-                                    onClose();
-                                }}
-                            >
-                                Interested
-                            </button>
+                            {clickFrom === 'Feed' ? (
+                                <>
+                                    <button
+                                        className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+                                        onClick={() => {
+                                            onAction('ignored', user._id);
+                                            onClose();
+                                        }}
+                                    >
+                                        Ignore
+                                    </button>
+                                    <button
+                                        className="flex-1 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+                                        onClick={() => {
+                                            onAction('interested', user._id);
+                                            onClose();
+                                        }}
+                                    >
+                                        Interested
+                                    </button>
+                                </>
+                            ) : clickFrom === 'Requests' ? (
+                                <>
+                                    <button
+                                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-500 hover:to-emerald-600 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl cursor-pointer"
+                                        onClick={() => {
+                                            onAction('accepted', requestId);
+                                            onClose();
+                                        }}
+                                    >
+                                        Accept
+                                    </button>
+                                    <button
+                                        className="flex-1 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold shadow-lg transition-all hover:shadow-xl cursor-pointer"
+                                        onClick={() => {
+                                            onAction('rejected', requestId);
+                                            onClose();
+                                        }}
+                                    >
+                                        Decline
+                                    </button>
+                                </>
+                            ) : ''}
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ProfileModal;
