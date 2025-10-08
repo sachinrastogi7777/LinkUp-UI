@@ -16,9 +16,7 @@ export default function EmptyFeedPage() {
     }, []);
 
     const handleRefreshFeed = () => {
-        console.log("Refresh Feed Clicked");
         const fetchFeed = getFeedData.length === 0 ? null : getFeedData;
-        console.log(fetchFeed);
         dispatch(addFeed(fetchFeed));
     }
 

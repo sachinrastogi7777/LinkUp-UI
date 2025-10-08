@@ -7,6 +7,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BASE_URL } from '../../utils/constants';
 import { addSentRequests } from '../../utils/slice/sentRequestSlice';
+import { addUserInFeed } from '../../utils/slice/feedSlice';
 
 const SentRequests = (props) => {
     const dispatch = useDispatch();
@@ -33,11 +34,10 @@ const SentRequests = (props) => {
     }
 
     const handleCancelRequest = (user, requestId) => {
-        console.log(user);
         setLoadingRequestId(requestId);
         deleteRequest(requestId).finally(() => {
             dispatch(addSentRequests(sentRequestsList.filter(req => req._id !== requestId)));
-            // dispatch(addUserInFeed(user.toUserId));
+            dispatch(addUserInFeed(user.toUserId));
             setLoadingRequestId(null);
         })
     };

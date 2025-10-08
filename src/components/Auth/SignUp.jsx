@@ -78,7 +78,6 @@ const SignUp = () => {
             setProfileImage(reader.result); // base64 string
             setProfileImageFile(file); //store file for upload
             setFormData(prev => ({ ...prev, profileImage: file }));
-            console.log(profileImage)
         }
         reader.readAsDataURL(file); // Converts to base64
     }

@@ -2,6 +2,7 @@
 @plugin "daisyui";
 
 @keyframes bounce-horizontal {
+
     0%,
     100% {
         transform: translateX(0);
@@ -49,6 +50,7 @@
 }
 
 @keyframes float {
+
     0%,
     100% {
         transform: translateY(0px);
@@ -87,4 +89,8 @@
 
 .logo-rotate:hover {
     transform: rotate(0deg);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }
