@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Github, MessageCircle, Info, Shield, FileText, HelpCircle, Users, Sparkles, Send, Copyright } from 'lucide-react';
+import { Heart, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Shield, FileText, HelpCircle, Users, Send, Copyright } from 'lucide-react';
 import logo from '../assets/linkup-icon.png'
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -96,15 +96,15 @@ const Footer = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-gray-300 text-sm">
                                     <Mail className="w-4 h-4 text-purple-400" />
-                                    <span>support@devtinder.com</span>
+                                    <span>support@linkup.com</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-gray-300 text-sm">
                                     <Phone className="w-4 h-4 text-purple-400" />
-                                    <span>+1 (555) 123-4567</span>
+                                    <span>+91 (999) 123-4567</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-gray-300 text-sm">
                                     <MapPin className="w-4 h-4 text-purple-400" />
-                                    <span>San Francisco, CA</span>
+                                    <span>Patna, Bihar</span>
                                 </div>
                             </div>
                         </div>

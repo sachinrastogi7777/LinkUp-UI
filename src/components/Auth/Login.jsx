@@ -170,7 +170,7 @@ const Login = () => {
                                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
                             </label>
                             <Link
-                                to="/reset-password"
+                                to="/forgot-password"
                                 className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors"
                             >
                                 Forgot Password?

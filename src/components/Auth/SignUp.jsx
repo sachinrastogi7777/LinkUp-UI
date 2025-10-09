@@ -11,7 +11,7 @@ import { addUser } from '../../utils/slice/userSlice';
 const SignUp = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [showPassword, setShowPassword] = useState(false);
-    const [profileImage, setProfileImage] = useState(null);
+    const [profileImage, setProfileImage] = useState('https://cdn.vectorstock.com/i/1000v/28/01/flat-style-faceless-portrait-of-a-young-man-head-vector-59492801.avif' || null);
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [createLoading, setCreateLoading] = useState(false);
     const fileInputRef = useRef(null);
@@ -30,7 +30,7 @@ const SignUp = () => {
         location: '',
         interests: [],
         about: '',
-        profileImage: null
+        profileImage: 'https://cdn.vectorstock.com/i/1000v/28/01/flat-style-faceless-portrait-of-a-young-man-head-vector-59492801.avif' || null
     });
 
     const [errors, setErrors] = useState({});
@@ -134,9 +134,14 @@ const SignUp = () => {
     const handleSubmit = async () => {
         try {
             setCreateLoading(true);
+            // If user provided a real file, upload it. Otherwise use the default/profileImage URL.
             let profileImageUrl = profileImage;
-            if (profileImage) {
-                profileImageUrl = await uploadImageToServer(profileImageFile, 'profile');
+            if (profileImageFile) {
+                try {
+                    profileImageUrl = await uploadImageToServer(profileImageFile, 'profile');
+                } catch (uploadErr) {
+                    profileImageUrl = profileImage;
+                }
             }
             const newUser = await axios.post(`${BASE_URL}/signup`, { ...formData, profileImage: profileImageUrl }, { withCredentials: true });
             if (newUser.data) {

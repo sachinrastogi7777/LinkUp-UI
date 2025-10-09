@@ -27,7 +27,7 @@ const Body = () => {
     }, [sentRequestsList]);
 
     useEffect(() => {
-        const publicRoutes = ['/login', '/signup', '/reset-password'];
+    const publicRoutes = ['/login', '/signup', '/forgot-password'];
         const isPublicRoute = publicRoutes.includes(location.pathname);
 
         if (isPublicRoute || userData) {
