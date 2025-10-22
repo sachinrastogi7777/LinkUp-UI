@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, ArrowLeft, Check, KeyRound, Lock, RefreshCw } from 'lucide-react';
 import { BASE_URL } from '../../utils/constants';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ForgotPassword = () => {
@@ -14,6 +14,35 @@ const ForgotPassword = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [timer, setTimer] = useState(60);
+    const [canResend, setCanResend] = useState(false);
+
+    useEffect(() => {
+        let interval;
+
+        if (step === 2 && timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => {
+                    if (prev <= 1) {
+                        setCanResend(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [step, timer]);
+
+    // Reset timer when OTP is sent
+    const resetTimer = () => {
+        setTimer(60);
+        setCanResend(false);
+    };
 
     const handleInputChange = (value, field) => {
         if (field === 'email') setEmail(value);
@@ -64,6 +93,7 @@ const ForgotPassword = () => {
             const response = await axios.post(`${BASE_URL}/forgot-password`, { email }, { withCredentials: true });
             if (response && response.status === 200) {
                 setStep(2);
+                resetTimer();
                 setSuccess('OTP sent to your email! 📧');
             } else {
                 const body = response?.data;
@@ -115,13 +145,14 @@ const ForgotPassword = () => {
     // Resend OTP
     const handleResendOTP = async () => {
         try {
-            setLoading(true);
+            setResendLoading(true);
             setError('');
             setSuccess('');
 
             const response = await axios.post(`${BASE_URL}/resend-otp`, { email }, { withCredentials: true });
             if (response && response.status === 200) {
-                setStep(2);
+                resetTimer();
+                setOtp('');
                 setSuccess('New OTP sent to your email! 📧');
             } else {
                 const body = response?.data;
@@ -130,7 +161,7 @@ const ForgotPassword = () => {
         } catch (err) {
             setError('Failed to resend OTP. Please try again.');
         } finally {
-            setLoading(false);
+            setResendLoading(false);
         }
     };
 
@@ -158,7 +189,6 @@ const ForgotPassword = () => {
     };
 
     const handleBackToLogin = () => {
-        // Reset all states
         setStep(1);
         setEmail('');
         setOtp('');
@@ -166,6 +196,8 @@ const ForgotPassword = () => {
         setConfirmPassword('');
         setError('');
         setSuccess('');
+        setTimer(60);
+        setCanResend(false);
         navigate('/login');
     };
 
@@ -189,10 +221,15 @@ const ForgotPassword = () => {
         }
     };
 
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
             <div className="relative z-10 w-full max-w-md">
-                {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-2xl mb-4">
                         <KeyRound className="w-10 h-10 text-purple-600" />
@@ -205,16 +242,12 @@ const ForgotPassword = () => {
                     </p>
                 </div>
 
-                {/* Form Card */}
                 <div className="bg-white bg-opacity-95 backdrop-blur-xl rounded-3xl shadow-2xl p-8">
-                    {/* Success Message */}
                     {success && (
                         <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                             {success}
                         </div>
                     )}
-
-                    {/* Error Message */}
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {error}
@@ -295,10 +328,18 @@ const ForgotPassword = () => {
                                     </p>
                                 </div>
 
+                                {/* Timer Display */}
+                                {!canResend && (
+                                    <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                                        <span className="inline-block w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                                        <span>Resend OTP available in <strong className="text-purple-600">{formatTime(timer)}</strong></span>
+                                    </div>
+                                )}
+
                                 <button
                                     onClick={handleVerifyOTP}
                                     disabled={loading || otp.length !== 6}
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center cursor-pointer gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -310,11 +351,15 @@ const ForgotPassword = () => {
 
                                 <button
                                     onClick={handleResendOTP}
-                                    disabled={loading}
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={!canResend || resendLoading}
+                                    className="w-full flex items-center justify-center cursor-pointer gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <RefreshCw className="w-5 h-5" />
-                                    Resend OTP
+                                    {resendLoading ? (
+                                        <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <RefreshCw className="w-5 h-5" />
+                                    )}
+                                    {resendLoading ? 'Sending...' : canResend ? 'Resend OTP' : `Resend OTP (${formatTime(timer)})`}
                                 </button>
                             </div>
                         </>
@@ -372,7 +417,7 @@ const ForgotPassword = () => {
                                 <button
                                     onClick={handleResetPassword}
                                     disabled={loading}
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center cursor-pointer gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -431,12 +476,12 @@ const ForgotPassword = () => {
                 {step === 1 && (
                     <p className="text-center text-white mt-6">
                         Don't have an account?{' '}
-                        <button
-                            onClick={() => alert('Redirecting to signup...')}
-                            className="font-semibold underline text-sm hover:text-gray-100 transition-colors"
+                        <Link
+                            to="/signup"
+                            className="font-semibold underline text-sm text-gray-800 hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-indigo-500 hover:bg-clip-text hover:text-transparent transition-colors"
                         >
                             Sign Up
-                        </button>
+                        </Link>
                     </p>
                 )}
             </div>
