@@ -56,4 +56,75 @@ const calculateAge = (dateOfBirth) => {
     return age;
 }
 
-export { getTimeAgo, formattedDate, uploadImageToServer, calculateAge };
+const getLastSeen = (timestamp) => {
+    const now = new Date();
+    const lastSeenDate = new Date(timestamp);
+    const diffInMs = now - lastSeenDate;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 1) {
+        return 'Last seen just now';
+    }
+    if (diffInMinutes < 60) {
+        return `Last seen ${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+    if (diffInHours < 24) {
+        return `Last seen ${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (lastSeenDate.toDateString() === yesterday.toDateString()) {
+        return `Last seen yesterday`;
+    }
+
+    if (diffInDays < 7) {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = days[lastSeenDate.getDay()];
+        return `Last seen ${dayName}`;
+    }
+
+    const day = lastSeenDate.getDate().toString().padStart(2, '0');
+    const month = (lastSeenDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = lastSeenDate.getFullYear();
+
+    return `Last seen ${day}/${month}/${year}`;
+};
+
+const groupMessagesByDate = (messages) => {
+    const groups = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    messages.forEach((message) => {
+        const messageDate = new Date(message.createdAt || message.timeStamp);
+        messageDate.setHours(0, 0, 0, 0);
+
+        let dateLabel;
+
+        if (messageDate.getTime() === today.getTime()) {
+            dateLabel = 'Today';
+        } else if (messageDate.getTime() === yesterday.getTime()) {
+            dateLabel = 'Yesterday';
+        } else {
+            const day = messageDate.getDate().toString().padStart(2, '0');
+            const month = (messageDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = messageDate.getFullYear();
+            dateLabel = `${day}/${month}/${year}`;
+        }
+
+        if (!groups[dateLabel]) {
+            groups[dateLabel] = [];
+        }
+        groups[dateLabel].push(message);
+    });
+
+    return groups;
+};
+
+export { getTimeAgo, formattedDate, uploadImageToServer, calculateAge, getLastSeen, groupMessagesByDate };

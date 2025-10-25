@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formattedDate, getTimeAgo } from '../../utils/helper';
-import { Cake, Calendar, Loader2, MapPin, Pencil, Users } from 'lucide-react';
+import { Cake, Calendar, Loader2, MapPin, MessageCircle, Pencil, Users } from 'lucide-react';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import ProfileShimmer from '../Shimmer/ProfileShimmer';
@@ -37,6 +37,10 @@ const UserProfile = ({ isPremium = false }) => {
     const joinDate = formattedDate(createdAt);
 
     const userConnections = async () => {
+        if (!_id) {
+            setIsLoadingConnections(false);
+            return;
+        }
         try {
             setIsLoadingConnections(true);
             const response = await axios.get(`${BASE_URL}/user/connections/${_id}`, { withCredentials: true });
@@ -57,8 +61,10 @@ const UserProfile = ({ isPremium = false }) => {
 
     useEffect(() => {
         setIsProfileLoading(false);
-        userConnections();
-    }, [userData])
+        if (_id) {
+            userConnections();
+        }
+    }, [_id])
 
     return (
         <>
@@ -84,11 +90,13 @@ const UserProfile = ({ isPremium = false }) => {
                         ) : (
                             <div className="flex flex-col md:flex-row items-center gap-6 -mt-16 md:-mt-20">
                                 <div className="relative">
-                                    <img
-                                        src={profileImage}
-                                        alt="Profile"
-                                        className="w-32 h-32 md:w-40 md:h-40 rounded-full border-6 border-white shadow-xl object-cover transition-transform duration-300 hover:scale-105"
-                                    />
+                                    {profileImage && (
+                                        <img
+                                            src={profileImage}
+                                            alt="Profile"
+                                            className="w-32 h-32 md:w-40 md:h-40 rounded-full border-6 border-white shadow-xl object-cover transition-transform duration-300 hover:scale-105"
+                                        />
+                                    )}
                                     <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-400 border-4 border-white rounded-full animate-pulse"></div>
                                 </div>
 
@@ -145,37 +153,133 @@ const UserProfile = ({ isPremium = false }) => {
                                             return (
                                                 <div
                                                     key={connection.connectionId}
-                                                    className="flex justify-between items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:translate-x-2 opacity-0 animate-fadeInUp"
+                                                    className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 cursor-pointer transition-all duration-200 hover:shadow-md opacity-0 animate-fadeInUp"
                                                     style={{
                                                         animation: `fadeInUp 0.5s ease-out forwards`,
                                                         animationDelay: `${connectionList.indexOf(connection) * 0.1}s`
                                                     }}
                                                 >
-                                                    <div className='flex items-center gap-3'>
-                                                        <div className="relative">
+                                                    {/* Desktop: Horizontal Layout */}
+                                                    <div className="hidden md:flex items-center gap-4">
+                                                        <div className="relative flex-shrink-0">
                                                             <img
                                                                 src={connection.user.profileImage}
                                                                 alt='Profile Pic'
-                                                                className="w-10 h-10 rounded-full object-cover"
+                                                                className="w-12 h-12 rounded-full object-cover"
                                                             />
+                                                            {connection.user.isOnline ? (
+                                                                <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                                                            ) : (
+                                                                <div className="absolute bottom-0 right-0 w-4 h-4 bg-gray-400 border-2 border-white rounded-full"></div>
+                                                            )}
                                                         </div>
-                                                        <span className="font-medium text-gray-700">{`${connection.user.firstName} ${connection.user.lastName}`}</span>
-                                                        <span className="font-medium text-gray-700">{`@${connection.user.userName}`}</span>
-                                                        <span className='text-black justify-end mx-8'>{`Connected Since, ${calculateTimeDiff}`}</span>
+                                                        <div className="flex-shrink-0 w-40 lg:w-auto lg:flex lg:gap-4">
+                                                            <div className="lg:w-40">
+                                                                <span className="font-semibold text-gray-800 block truncate">
+                                                                    {`${connection.user.firstName} ${connection.user.lastName}`}
+                                                                </span>
+                                                                <span className="font-medium text-gray-500 text-sm lg:hidden truncate block">
+                                                                    {`@${connection.user.userName}`}
+                                                                </span>
+                                                            </div>
+                                                            <div className="hidden lg:block lg:w-32">
+                                                                <span className="font-medium text-gray-500 text-sm truncate block">
+                                                                    {`@${connection.user.userName}`}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-shrink-0 w-32 lg:w-40">
+                                                            <span className="font-medium text-gray-500 text-xs lg:text-sm truncate block">
+                                                                {`Connected ${calculateTimeDiff}`}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex-1"></div>
+
+                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                            <button
+                                                                className="px-3 lg:px-4 py-2 bg-purple-600 text-white rounded-full shadow hover:bg-purple-700 transition font-semibold cursor-pointer text-xs lg:text-sm whitespace-nowrap"
+                                                                onClick={() => {
+                                                                    setSelectedUser(connection.user);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                View Profile
+                                                            </button>
+                                                            <button
+                                                                className="px-3 lg:px-4 py-2 bg-gray-200 text-gray-800 rounded-full shadow hover:bg-gray-300 transition font-semibold border border-gray-300 cursor-pointer text-xs lg:text-sm whitespace-nowrap"
+                                                                onClick={() => handleRemove(connection.user.userName)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                            <Link to={`/chat/${connection.user._id}`} state={{ user: connection.user }}>
+                                                                <button
+                                                                    className="px-3 lg:px-4 py-2 bg-green-100 text-green-800 rounded-full shadow hover:bg-green-200 transition font-semibold flex items-center gap-1 lg:gap-2 cursor-pointer text-xs lg:text-sm whitespace-nowrap"
+                                                                >
+                                                                    <MessageCircle size={16} />
+                                                                    <span className="hidden lg:inline">Chat</span>
+                                                                    <span className="lg:hidden">Chat</span>
+                                                                </button>
+                                                            </Link>
+                                                        </div>
                                                     </div>
-                                                    <span className="flex gap-2">
-                                                        <button
-                                                            className="px-4 py-2 bg-purple-600 text-white rounded-full shadow hover:bg-purple-700 transition font-semibold cursor-pointer"
-                                                            onClick={() => {
-                                                                // pass the inner user object (connection.user) to the modal
-                                                                setSelectedUser(connection.user);
-                                                                setIsModalOpen(true);
-                                                            }}
-                                                        >
-                                                            View Profile
-                                                        </button>
-                                                        <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-full shadow hover:bg-gray-300 transition font-semibold border border-gray-300 cursor-pointer">Remove Connection</button>
-                                                    </span>
+
+                                                    {/* Mobile: Stacked Layout */}
+                                                    <div className="md:hidden">
+                                                        <div className='flex items-center gap-3 mb-3'>
+                                                            <div className="relative flex-shrink-0">
+                                                                <img
+                                                                    src={connection.user.profileImage}
+                                                                    alt='Profile Pic'
+                                                                    className="w-12 h-12 rounded-full object-cover"
+                                                                />
+                                                                {connection.user.isOnline ? (
+                                                                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                                                                ) : (
+                                                                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-gray-400 border-2 border-white rounded-full"></div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                                                                <div className="flex flex-col gap-1 min-w-0">
+                                                                    <span className="font-semibold text-gray-800 truncate">
+                                                                        {`${connection.user.firstName} ${connection.user.lastName}`}
+                                                                    </span>
+                                                                    <span className="font-medium text-gray-500 text-sm truncate">
+                                                                        {`@${connection.user.userName}`}
+                                                                    </span>
+                                                                </div>
+                                                                <span className='font-medium text-gray-500 text-sm whitespace-nowrap ml-auto'>
+                                                                    {`Connected ${calculateTimeDiff}`}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <button
+                                                                className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white rounded-full shadow hover:bg-purple-700 transition font-semibold cursor-pointer text-sm whitespace-nowrap"
+                                                                onClick={() => {
+                                                                    setSelectedUser(connection.user);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                View Profile
+                                                            </button>
+                                                            <button
+                                                                className="flex-1 sm:flex-none px-4 py-2 bg-gray-200 text-gray-800 rounded-full shadow hover:bg-gray-300 transition font-semibold border border-gray-300 cursor-pointer text-sm whitespace-nowrap"
+                                                                onClick={() => handleRemove(connection.user.userName)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                            <Link to={`/chat/${connection.user._id}`} state={{ user: connection.user }}>
+                                                                <button
+                                                                    className="w-full sm:w-auto px-4 py-2 bg-green-100 text-green-800 rounded-full shadow hover:bg-green-200 transition font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm whitespace-nowrap"
+                                                                >
+                                                                    <MessageCircle size={16} />
+                                                                    Chat
+                                                                </button>
+                                                            </Link>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             );
                                         })
@@ -183,7 +287,9 @@ const UserProfile = ({ isPremium = false }) => {
                                         <div className="text-center py-8">
                                             <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                                             <p className="text-gray-500 font-medium">No connections found</p>
-                                            <Link to='/' className="text-gray-400 text-sm hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-indigo-500 hover:bg-clip-text hover:text-transparent transition-colors">Start connecting with other users!</Link>
+                                            <Link to='/' className="text-gray-400 text-sm hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-indigo-500 hover:bg-clip-text hover:text-transparent transition-colors">
+                                                Start connecting with other users!
+                                            </Link>
                                         </div>
                                     )}
                                 </div>
@@ -202,7 +308,7 @@ const UserProfile = ({ isPremium = false }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             <ProfileModal
                 isOpen={isModalOpen}
                 onClose={() => {
