@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Send, Smile, Paperclip, MoreVertical, Phone, Video, Search, Image, ArrowLeft, Loader2 } from 'lucide-react';
+import { Send, Smile, Paperclip, MoreVertical, Phone, Video, Search, Image as ImageIcon, ArrowLeft, Loader2, X } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import { createSocketConnection } from '../../utils/socket';
 import { useSelector } from 'react-redux';
@@ -7,7 +7,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import { toast } from 'react-toastify';
-import { getLastSeen, groupMessagesByDate } from '../../utils/helper';
+import { getLastSeen, groupMessagesByDate, uploadImageToServer } from '../../utils/helper';
 import MessageStatus from './MessageStatus';
 import TypingIndicator from './TypingIndicator';
 
@@ -21,6 +21,10 @@ const Chat = () => {
     const [totalMessages, setTotalMessages] = useState(0);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [fullscreenImage, setFullscreenImage] = useState(null);
 
     const loggedInUser = useSelector(store => store.user);
     const loggedInUserId = loggedInUser?._id;
@@ -35,6 +39,7 @@ const Chat = () => {
     const emojiPickerRef = useRef(null);
     const socketRef = useRef(null);
     const isTypingEmittedRef = useRef(false);
+    const imageInputRef = useRef(null);
 
     const navigate = useNavigate();
 
@@ -98,6 +103,8 @@ const Chat = () => {
                 senderName: msg.senderId.firstName + ' ' + msg.senderId.lastName,
                 messageId: msg._id,
                 text: msg.text,
+                messageType: msg.messageType || 'text',
+                imageUrl: msg.imageUrl || null,
                 createdAt: msg.createdAt,
                 status: msg.status || 'sent',
                 deliveredAt: msg.deliveredAt,
@@ -239,6 +246,8 @@ const Chat = () => {
                     receiverId: data.receiverId,
                     receiverName: data.receiverName,
                     text: data.text,
+                    messageType: data.messageType || 'text',
+                    imageUrl: data.imageUrl || null,
                     createdAt: data.createdAt,
                     timeStamp: data.timeStamp,
                     messageId: data.messageId,
@@ -395,8 +404,48 @@ const Chat = () => {
         }
     };
 
+    const handleImageSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                toast.error('Please select a valid image file.', {
+                    position: 'top-center',
+                    autoClose: 2000,
+                });
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Image size should be less than 5MB.', {
+                    position: 'top-center',
+                    autoClose: 2000,
+                });
+                return;
+            }
+
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (imageInputRef.current) {
+            imageInputRef.current.value = '';
+        }
+    };
+
     const handleSendMessage = async () => {
-        if (newMessage.trim() === '' || !socketRef.current) {
+        if (!newMessage.trim() && !selectedImage) {
+            return;
+        }
+
+        if (!socketRef.current) {
+            toast.error('Connection error. Please refresh the page.');
             return;
         }
 
@@ -409,16 +458,35 @@ const Chat = () => {
             isTypingEmittedRef.current = false;
         }
 
+        let imageUrl = null;
+
+        if (selectedImage) {
+            try {
+                setIsUploadingImage(true);
+                imageUrl = await uploadImageToServer(selectedImage, 'chat');
+            } catch (error) {
+                console.error('Image upload failed:', error);
+                toast.error('Failed to send image. Please try again.');
+                setIsUploadingImage(false);
+                return;
+            } finally {
+                setIsUploadingImage(false);
+            }
+        }
+
         socketRef.current.emit('sendMessage', {
             senderId: loggedInUserId,
             senderName: loggedInUser?.firstName + ' ' + loggedInUser?.lastName,
             receiverId: userId,
             receiverName: chatPartner?.firstName + ' ' + chatPartner?.lastName || 'User',
-            text: newMessage,
+            text: newMessage.trim(),
+            imageUrl: imageUrl,
+            messageType: imageUrl ? 'image' : 'text',
             timeStamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         });
 
         setNewMessage('');
+        handleRemoveImage();
     };
 
     const handleKeyPress = (e) => {
@@ -546,7 +614,18 @@ const Chat = () => {
                                                         : 'bg-white text-gray-800 rounded-bl-none shadow-md'
                                                         }`}
                                                 >
-                                                    <p className="text-sm leading-relaxed">{msg.text}</p>
+                                                    {msg.messageType === 'image' && msg.imageUrl && (
+                                                        <img
+                                                            src={msg.imageUrl}
+                                                            alt="Shared image"
+                                                            className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity mb-2"
+                                                            style={{ maxHeight: '300px', minWidth: '200px' }}
+                                                            onClick={() => setFullscreenImage(msg.imageUrl)}
+                                                        />
+                                                    )}
+                                                    {msg.text && (
+                                                        <p className="text-sm leading-relaxed">{msg.text}</p>
+                                                    )}
                                                 </div>
                                                 <div className={`flex items-center gap-1.5 text-xs text-gray-500 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                                                     <span>{timeStamp}</span>
@@ -573,6 +652,24 @@ const Chat = () => {
                 </div>
 
                 <div className="bg-white border-t border-gray-200 px-6 py-4">
+                    {imagePreview && (
+                        <div className="mb-4 relative inline-block">
+                            <div className="relative">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="rounded-lg max-h-32 object-cover shadow-lg"
+                                />
+                                <button
+                                    onClick={handleRemoveImage}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-3">
                         <div style={{ position: 'relative' }} ref={emojiPickerRef}>
                             <button
@@ -594,11 +691,27 @@ const Chat = () => {
                                 </div>
                             )}
                         </div>
-                        <button className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full">
-                            <Paperclip className="w-6 h-6" />
-                        </button>
-                        <button className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full">
-                            <Image className="w-6 h-6" />
+                        <div className="relative group">
+                            <button className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full">
+                                <Paperclip className="w-6 h-6" />
+                            </button>
+                            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                Feature is under development..
+                            </span>
+                        </div>
+
+                        <input
+                            ref={imageInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageSelect}
+                        />
+                        <button
+                            onClick={() => imageInputRef.current?.click()}
+                            className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full"
+                        >
+                            <ImageIcon className="w-6 h-6" />
                         </button>
 
                         <div className="flex-1 relative">
@@ -619,10 +732,14 @@ const Chat = () => {
 
                         <button
                             className="p-3 cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
-                            disabled={!newMessage.trim()}
+                            disabled={(!newMessage.trim() && !selectedImage) || isUploadingImage}
                             onClick={handleSendMessage}
                         >
-                            <Send className="w-5 h-5" />
+                            {isUploadingImage ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <Send className="w-5 h-5" />
+                            )}
                         </button>
                     </div>
 
@@ -631,6 +748,26 @@ const Chat = () => {
                     </p>
                 </div>
             </div>
+
+            {fullscreenImage && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+                    onClick={() => setFullscreenImage(null)}
+                >
+                    <button
+                        onClick={() => setFullscreenImage(null)}
+                        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+                    >
+                        <X className="w-8 h-8" />
+                    </button>
+                    <img
+                        src={fullscreenImage}
+                        alt="Fullscreen"
+                        className="max-w-full max-h-full object-contain rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 };
