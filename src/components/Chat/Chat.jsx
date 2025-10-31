@@ -40,6 +40,7 @@ const Chat = () => {
     const socketRef = useRef(null);
     const isTypingEmittedRef = useRef(false);
     const imageInputRef = useRef(null);
+    const hasJoinedChatRef = useRef(false);
 
     const navigate = useNavigate();
 
@@ -227,8 +228,9 @@ const Chat = () => {
             socketRef.current = socket;
 
             const joinChatRoom = () => {
-                if (socket.connected) {
+                if (socket.connected && !hasJoinedChatRef.current) {
                     socket.emit('joinChat', { loggedInUserId, userId });
+                    hasJoinedChatRef.current = true;
                 }
             };
 
@@ -318,14 +320,16 @@ const Chat = () => {
 
             // Cleanup function
             return () => {
-                if (socket && loggedInUserId && userId) {
+                if (socket && loggedInUserId && userId && hasJoinedChatRef.current) {
                     if (isTypingEmittedRef.current) {
                         socket.emit('stop-typing', {
                             senderId: loggedInUserId,
                             receiverId: userId
                         });
+                        isTypingEmittedRef.current = false;
                     }
                     socket.emit('leaveChat', { loggedInUserId, userId });
+                    hasJoinedChatRef.current = false;
                 }
 
                 if (socket) {
@@ -347,19 +351,7 @@ const Chat = () => {
     // Component unmount
     useEffect(() => {
         return () => {
-            if (socketRef.current && isTypingEmittedRef.current && loggedInUserId && userId) {
-                socketRef.current.emit('stop-typing', {
-                    senderId: loggedInUserId,
-                    receiverId: userId
-                });
-            }
-        };
-    }, [userId, loggedInUserId]);
-
-    // Page unload
-    useEffect(() => {
-        const handleBeforeUnload = () => {
-            if (socketRef.current?.connected && loggedInUserId && userId) {
+            if (socketRef.current && hasJoinedChatRef.current && loggedInUserId && userId) {
                 if (isTypingEmittedRef.current) {
                     socketRef.current.emit('stop-typing', {
                         senderId: loggedInUserId,
@@ -367,6 +359,23 @@ const Chat = () => {
                     });
                 }
                 socketRef.current.emit('leaveChat', { loggedInUserId, userId });
+                hasJoinedChatRef.current = false;
+            }
+        };
+    }, [userId, loggedInUserId]);
+
+    // Page unload
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            if (socketRef.current?.connected && loggedInUserId && userId && hasJoinedChatRef.current) {
+                if (isTypingEmittedRef.current) {
+                    socketRef.current.emit('stop-typing', {
+                        senderId: loggedInUserId,
+                        receiverId: userId
+                    });
+                }
+                socketRef.current.emit('leaveChat', { loggedInUserId, userId });
+                hasJoinedChatRef.current = false;
             }
         };
 
@@ -501,6 +510,28 @@ const Chat = () => {
             setTimeout(() => scrollToBottom(), 100);
         }
     }, [isPartnerTyping]);
+
+    useEffect(() => {
+        const handleGlobalDelivery = (event) => {
+            const { messageId, deliveredAt } = event.detail;
+            console.log('📬 [GLOBAL] Message delivered:', messageId);
+
+            setMessages(prevMessages =>
+                prevMessages.map(msg => {
+                    if (msg.messageId === messageId && msg.status === 'sent') {
+                        return { ...msg, status: 'delivered', deliveredAt };
+                    }
+                    return msg;
+                })
+            );
+        };
+
+        window.addEventListener('message-delivered', handleGlobalDelivery);
+
+        return () => {
+            window.removeEventListener('message-delivered', handleGlobalDelivery);
+        };
+    }, []);
 
     const lastSeen = getLastSeen(chatPartner?.lastSeen);
     const groupedMessages = groupMessagesByDate(messages);
