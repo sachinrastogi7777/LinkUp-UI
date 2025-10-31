@@ -8,6 +8,8 @@ import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import { toast } from 'react-toastify';
 import { getLastSeen, groupMessagesByDate } from '../../utils/helper';
+import MessageStatus from './MessageStatus';
+import TypingIndicator from './TypingIndicator';
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
@@ -18,6 +20,7 @@ const Chat = () => {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [totalMessages, setTotalMessages] = useState(0);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isPartnerTyping, setIsPartnerTyping] = useState(false);
 
     const loggedInUser = useSelector(store => store.user);
     const loggedInUserId = loggedInUser?._id;
@@ -30,6 +33,8 @@ const Chat = () => {
     const previousScrollHeight = useRef(0);
     const isFetchingRef = useRef(false);
     const emojiPickerRef = useRef(null);
+    const socketRef = useRef(null);
+    const isTypingEmittedRef = useRef(false);
 
     const navigate = useNavigate();
 
@@ -93,7 +98,10 @@ const Chat = () => {
                 senderName: msg.senderId.firstName + ' ' + msg.senderId.lastName,
                 messageId: msg._id,
                 text: msg.text,
-                createdAt: msg.createdAt
+                createdAt: msg.createdAt,
+                status: msg.status || 'sent',
+                deliveredAt: msg.deliveredAt,
+                seenAt: msg.seenAt
             }));
 
             if (page === 1) {
@@ -209,26 +217,79 @@ const Chat = () => {
             }
 
             const socket = createSocketConnection();
-            socket.emit('joinChat', { loggedInUserId, userId });
+            socketRef.current = socket;
 
-            socket.on('receiveMessage', ({ senderId, senderName, receiverId, receiverName, text, timeStamp, createdAt }) => {
+            const joinChatRoom = () => {
+                if (socket.connected) {
+                    socket.emit('joinChat', { loggedInUserId, userId });
+                }
+            };
+
+            if (socket.connected) {
+                joinChatRoom();
+            }
+
+            socket.on('connect', joinChatRoom);
+
+            // RECEIVE MESSAGE
+            socket.on('receiveMessage', (data) => {
                 const newMessageObj = {
-                    senderId: senderId,
-                    senderName: senderName,
-                    receiverId: receiverId,
-                    receiverName: receiverName,
-                    text: text,
-                    createdAt: createdAt,
-                    timeStamp: timeStamp,
-                    messageId: Date.now().toString()
+                    senderId: data.senderId,
+                    senderName: data.senderName,
+                    receiverId: data.receiverId,
+                    receiverName: data.receiverName,
+                    text: data.text,
+                    createdAt: data.createdAt,
+                    timeStamp: data.timeStamp,
+                    messageId: data.messageId,
+                    status: data.status,
+                    deliveredAt: data.deliveredAt,
+                    seenAt: data.seenAt
                 };
 
-                setMessages((prevMessages) => [...prevMessages, newMessageObj]);
-                setTotalMessages(prev => prev + 1);
+                setMessages((prevMessages) => {
+                    const existingIndex = prevMessages.findIndex(msg => msg.messageId === data.messageId);
+                    if (existingIndex !== -1) {
+                        return prevMessages.map((msg, idx) =>
+                            idx === existingIndex ? { ...msg, ...newMessageObj } : msg
+                        );
+                    }
+                    return [...prevMessages, newMessageObj];
+                });
+
+                if (data.senderId !== loggedInUserId) {
+                    setTotalMessages(prev => prev + 1);
+                    setIsPartnerTyping(false);
+                }
 
                 setTimeout(() => scrollToBottom(), 100);
             });
 
+            // MESSAGE DELIVERED
+            socket.on('message-delivered', ({ messageId, deliveredAt }) => {
+                setMessages(prevMessages =>
+                    prevMessages.map(msg => {
+                        if (msg.messageId === messageId && msg.status === 'sent') {
+                            return { ...msg, status: 'delivered', deliveredAt };
+                        }
+                        return msg;
+                    })
+                );
+            });
+
+            // MESSAGES SEEN (multiple)
+            socket.on('messages-seen', ({ messageIds, seenAt }) => {
+                setMessages(prevMessages =>
+                    prevMessages.map(msg => {
+                        if (messageIds && messageIds.includes(msg.messageId) && msg.status !== 'seen') {
+                            return { ...msg, status: 'seen', seenAt };
+                        }
+                        return msg;
+                    })
+                );
+            });
+
+            // USER STATUS CHANGED
             socket.on('user-status-changed', ({ userId: changedUserId, isOnline, lastSeen }) => {
                 if (changedUserId === userId) {
                     setChatPartner(prev => ({
@@ -239,21 +300,116 @@ const Chat = () => {
                 }
             });
 
+            // USER TYPING
+            socket.on('user-typing', ({ userId: typingUserId, userName, isTyping }) => {
+                if (typingUserId === userId) {
+                    setIsPartnerTyping(isTyping);
+                }
+            });
+
+            // Cleanup function
             return () => {
-                socket.off('receiveMessage');
-                socket.off('user-status-changed');
-                socket.disconnect();
+                if (socket && loggedInUserId && userId) {
+                    if (isTypingEmittedRef.current) {
+                        socket.emit('stop-typing', {
+                            senderId: loggedInUserId,
+                            receiverId: userId
+                        });
+                    }
+                    socket.emit('leaveChat', { loggedInUserId, userId });
+                }
+
+                if (socket) {
+                    socket.off('receiveMessage');
+                    socket.off('message-delivered');
+                    socket.off('messages-seen');
+                    socket.off('user-status-changed');
+                    socket.off('user-typing');
+                    socket.off('connect');
+                }
+
+                socketRef.current = null;
             };
         };
 
         initializeChat();
+    }, [loggedInUserId, userId, navigate]);
+
+    // Component unmount
+    useEffect(() => {
+        return () => {
+            if (socketRef.current && isTypingEmittedRef.current && loggedInUserId && userId) {
+                socketRef.current.emit('stop-typing', {
+                    senderId: loggedInUserId,
+                    receiverId: userId
+                });
+            }
+        };
+    }, [userId, loggedInUserId]);
+
+    // Page unload
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            if (socketRef.current?.connected && loggedInUserId && userId) {
+                if (isTypingEmittedRef.current) {
+                    socketRef.current.emit('stop-typing', {
+                        senderId: loggedInUserId,
+                        receiverId: userId
+                    });
+                }
+                socketRef.current.emit('leaveChat', { loggedInUserId, userId });
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
     }, [loggedInUserId, userId]);
 
-    const handleSendMessage = async () => {
-        if (newMessage.trim() === '') return;
+    const handleTyping = (messageValue) => {
+        if (!socketRef.current?.connected) {
+            return;
+        }
 
-        const socket = createSocketConnection();
-        socket.emit('sendMessage', {
+        const currentLength = messageValue.trim().length;
+        if (currentLength === 0) {
+            if (isTypingEmittedRef.current) {
+                socketRef.current.emit('stop-typing', {
+                    senderId: loggedInUserId,
+                    receiverId: userId
+                });
+                isTypingEmittedRef.current = false;
+            }
+            return;
+        }
+
+        if (!isTypingEmittedRef.current) {
+            socketRef.current.emit('typing', {
+                senderId: loggedInUserId,
+                receiverId: userId,
+                senderName: loggedInUser?.firstName + ' ' + loggedInUser?.lastName
+            });
+            isTypingEmittedRef.current = true;
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (newMessage.trim() === '' || !socketRef.current) {
+            return;
+        }
+
+        // Stop typing when message is sent
+        if (isTypingEmittedRef.current) {
+            socketRef.current.emit('stop-typing', {
+                senderId: loggedInUserId,
+                receiverId: userId
+            });
+            isTypingEmittedRef.current = false;
+        }
+
+        socketRef.current.emit('sendMessage', {
             senderId: loggedInUserId,
             senderName: loggedInUser?.firstName + ' ' + loggedInUser?.lastName,
             receiverId: userId,
@@ -272,7 +428,13 @@ const Chat = () => {
         }
     };
 
-    const lastSeen = getLastSeen(chatPartner?.updatedAt);
+    useEffect(() => {
+        if (isPartnerTyping) {
+            setTimeout(() => scrollToBottom(), 100);
+        }
+    }, [isPartnerTyping]);
+
+    const lastSeen = getLastSeen(chatPartner?.lastSeen);
     const groupedMessages = groupMessagesByDate(messages);
 
     return (
@@ -292,18 +454,18 @@ const Chat = () => {
                                 alt={chatPartner ? `${chatPartner.firstName} ${chatPartner.lastName}` : 'Chat Partner'}
                                 className="w-12 h-12 rounded-full border-2 border-white shadow-lg object-cover"
                             />
-                            {chatPartner?.isOnline ? (
-                                <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
-                            ) : (
-                                <div className="absolute bottom-0 right-0 w-4 h-4 bg-gray-400 border-2 border-white rounded-full"></div>
-                            )}
+                            <div className={`absolute bottom-0 right-0 w-4 h-4 border-2 border-white rounded-full ${chatPartner?.isOnline ? 'bg-green-400' : 'bg-gray-400'}`}></div>
                         </div>
                         <div>
                             <h2 className="text-white font-bold text-lg">
                                 {chatPartner ? `${chatPartner.firstName} ${chatPartner.lastName}` : 'Chat'}
                             </h2>
                             <p className="text-white text-sm opacity-90">
-                                {chatPartner?.isOnline ? 'online' : lastSeen}
+                                {isPartnerTyping ? (
+                                    <span className="text-green-300 font-medium">typing...</span>
+                                ) : (
+                                    chatPartner?.isOnline ? 'online' : lastSeen
+                                )}
                             </p>
                         </div>
                     </div>
@@ -362,13 +524,15 @@ const Chat = () => {
                                 const timeStamp = msg?.createdAt
                                     ? new Date(msg?.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                                     : msg?.timeStamp;
+                                const isOwnMessage = msg.senderId === loggedInUserId;
+
                                 return (
                                     <div
                                         key={msg.messageId}
-                                        className={`flex ${msg.senderId === loggedInUserId ? 'justify-end' : 'justify-start'}`}
+                                        className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`flex items-center gap-2 max-w-[70%] ${msg.senderId === loggedInUserId ? 'flex-row-reverse' : 'flex-row'}`}>
-                                            {msg.senderId !== loggedInUserId && (
+                                        <div className={`flex items-end gap-2 max-w-[70%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                                            {!isOwnMessage && (
                                                 <img
                                                     src={chatPartner?.profileImage || '/default-avatar.png'}
                                                     alt={chatPartner?.firstName}
@@ -377,15 +541,18 @@ const Chat = () => {
                                             )}
                                             <div className="flex flex-col gap-1">
                                                 <div
-                                                    className={`px-4 py-2 rounded-2xl ${msg.senderId === loggedInUserId
+                                                    className={`px-4 py-2 rounded-2xl ${isOwnMessage
                                                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-none'
                                                         : 'bg-white text-gray-800 rounded-bl-none shadow-md'
                                                         }`}
                                                 >
                                                     <p className="text-sm leading-relaxed">{msg.text}</p>
                                                 </div>
-                                                <div className={`flex items-center gap-1 text-xs text-gray-500 ${msg.senderId === loggedInUserId ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                <div className={`flex items-center gap-1.5 text-xs text-gray-500 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                                                     <span>{timeStamp}</span>
+                                                    {isOwnMessage && (
+                                                        <MessageStatus status={msg.status} />
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -394,6 +561,14 @@ const Chat = () => {
                             })}
                         </div>
                     ))}
+
+                    {isPartnerTyping && (
+                        <TypingIndicator
+                            userName={chatPartner?.firstName}
+                            userImage={chatPartner?.profileImage}
+                        />
+                    )}
+
                     <div ref={messagesEndRef} />
                 </div>
 
@@ -429,7 +604,11 @@ const Chat = () => {
                         <div className="flex-1 relative">
                             <textarea
                                 value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setNewMessage(value);
+                                    handleTyping(value);
+                                }}
                                 onKeyPress={handleKeyPress}
                                 placeholder="Type a message..."
                                 rows="1"
