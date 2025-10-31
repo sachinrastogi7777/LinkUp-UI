@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Cake, Calendar, Loader, Loader2, MapPin, MessageCircle, Pencil, Trash2, Users } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux'
 import { formattedDate, getTimeAgo } from '../../utils/helper';
-import { Cake, Calendar, Loader2, MapPin, MessageCircle, Pencil, Users } from 'lucide-react';
-import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
 import ProfileShimmer from '../Shimmer/ProfileShimmer';
 import ConnectionShimmer from '../Shimmer/ConnectionShimmer';
-import { Link, useNavigate } from 'react-router-dom';
 import { addConnection } from '../../utils/slice/connectionSlice';
+import { addUserInFeed } from '../../utils/slice/feedSlice';
 import ProfileModal from './ProfileModal';
 
 const UserProfile = ({ isPremium = false }) => {
@@ -19,6 +21,7 @@ const UserProfile = ({ isPremium = false }) => {
     const [isProfileLoading, setIsProfileLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [loadingRequestId, setLoadingRequestId] = useState(null);
     const {
         firstName = '',
         lastName = '',
@@ -57,14 +60,41 @@ const UserProfile = ({ isPremium = false }) => {
         finally {
             setIsLoadingConnections(false);
         }
-    }
+    };
+
+    const removeConnection = async (connectionId) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/removeConnection/${connectionId}`, { withCredentials: true });
+            if (response.status === 200) {
+                toast.error('Connection removed successfully!', {
+                    position: 'top-center',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: false,
+                });
+            }
+        } catch (error) {
+            console.error('Error removing connection:', error);
+        }
+    };
 
     useEffect(() => {
         setIsProfileLoading(false);
         if (_id) {
             userConnections();
         }
-    }, [_id])
+    }, [_id]);
+
+    const handleRemoveConnection = (user, requestId) => {
+        setLoadingRequestId(requestId);
+        removeConnection(requestId).finally(() => {
+            dispatch(addConnection(connectionList.filter(req => req.connectionId !== requestId)));
+            dispatch(addUserInFeed(user.user));
+            setLoadingRequestId(null);
+        })
+    };
 
     return (
         <>
@@ -207,10 +237,21 @@ const UserProfile = ({ isPremium = false }) => {
                                                                 View Profile
                                                             </button>
                                                             <button
+                                                                onClick={() => handleRemoveConnection(connection, connection.connectionId)}
                                                                 className="px-3 lg:px-4 py-2 bg-gray-200 text-gray-800 rounded-full shadow hover:bg-gray-300 transition font-semibold border border-gray-300 cursor-pointer text-xs lg:text-sm whitespace-nowrap"
-                                                                onClick={() => handleRemove(connection.user.userName)}
+                                                                disabled={loadingRequestId === connection.connectionId}
                                                             >
-                                                                Remove
+                                                                {loadingRequestId === connection.connectionId ? (
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Loader className="w-4 h-4 animate-spin" />
+                                                                        Processing...
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                        Remove
+                                                                    </span>
+                                                                )}
                                                             </button>
                                                             <Link to={`/chat/${connection.user._id}`} state={{ user: connection.user }}>
                                                                 <button
@@ -265,10 +306,16 @@ const UserProfile = ({ isPremium = false }) => {
                                                                 View Profile
                                                             </button>
                                                             <button
+                                                                onClick={() => handleRemoveConnection(connection, connection.connectionId)}
                                                                 className="flex-1 sm:flex-none px-4 py-2 bg-gray-200 text-gray-800 rounded-full shadow hover:bg-gray-300 transition font-semibold border border-gray-300 cursor-pointer text-sm whitespace-nowrap"
-                                                                onClick={() => handleRemove(connection.user.userName)}
+                                                                disabled={loadingRequestId === connection.connectionId}
                                                             >
-                                                                Remove
+                                                                {loadingRequestId === connection.connectionId ? (
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Loader className="w-4 h-4 animate-spin" />
+                                                                        Processing...
+                                                                    </span>
+                                                                ) : 'Remove'}
                                                             </button>
                                                             <Link to={`/chat/${connection.user._id}`} state={{ user: connection.user }}>
                                                                 <button

@@ -32,7 +32,6 @@ const useSocketStatus = (isAuthenticated) => {
         const handleConnect = () => {
             if (userId && !isOnlineEmitted.current) {
                 socket.emit('user-online', { userId });
-                console.log('👤 User marked as ONLINE:', userId);
                 isOnlineEmitted.current = true;
             }
         };
@@ -46,7 +45,6 @@ const useSocketStatus = (isAuthenticated) => {
         const handleReconnect = () => {
             if (userId) {
                 socket.emit('user-online', { userId });
-                console.log('👤 User marked as ONLINE after reconnect:', userId);
                 isOnlineEmitted.current = true;
             }
         };
