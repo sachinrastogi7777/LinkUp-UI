@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Send, Smile, Paperclip, MoreVertical, Phone, Video, Search, Image as ImageIcon, ArrowLeft, Loader2, X } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import { createSocketConnection } from '../../utils/socket';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { getLastSeen, groupMessagesByDate, uploadImageToServer } from '../../utils/helper';
 import MessageStatus from './MessageStatus';
 import TypingIndicator from './TypingIndicator';
+import { resetUnreadCount } from '../../utils/slice/connectionSlice';
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
@@ -43,6 +44,7 @@ const Chat = () => {
     const hasJoinedChatRef = useRef(false);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // Close emoji picker when clicking outside
     useEffect(() => {
@@ -231,6 +233,8 @@ const Chat = () => {
                 if (socket.connected && !hasJoinedChatRef.current) {
                     socket.emit('joinChat', { loggedInUserId, userId });
                     hasJoinedChatRef.current = true;
+
+                    dispatch(resetUnreadCount({ userId }));
                 }
             };
 
@@ -346,7 +350,7 @@ const Chat = () => {
         };
 
         initializeChat();
-    }, [loggedInUserId, userId, navigate]);
+    }, [loggedInUserId, userId, navigate, dispatch]);
 
     // Component unmount
     useEffect(() => {
@@ -514,7 +518,6 @@ const Chat = () => {
     useEffect(() => {
         const handleGlobalDelivery = (event) => {
             const { messageId, deliveredAt } = event.detail;
-            console.log('📬 [GLOBAL] Message delivered:', messageId);
 
             setMessages(prevMessages =>
                 prevMessages.map(msg => {
@@ -537,29 +540,32 @@ const Chat = () => {
     const groupedMessages = groupMessagesByDate(messages);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-4">
-            <div className="max-w-5xl mx-auto h-[calc(100vh-2rem)] bg-white bg-opacity-95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+        <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 md:p-4">
+            {/* Mobile: Full screen | Desktop: Centered with padding */}
+            <div className="md:max-w-5xl mx-auto h-screen md:h-[calc(100vh-2rem)] bg-white md:bg-opacity-95 md:backdrop-blur-xl md:rounded-3xl md:shadow-2xl overflow-hidden flex flex-col">
+
+                {/* Header - Responsive */}
+                <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 px-3 sm:px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
                         <button
-                            className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all"
+                            className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 md:p-2 transition-all flex-shrink-0"
                             onClick={() => window.history.back()}
                         >
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
                         </button>
-                        <div className="relative">
+                        <div className="relative flex-shrink-0">
                             <img
                                 src={chatPartner?.profileImage || '/default-avatar.png'}
                                 alt={chatPartner ? `${chatPartner.firstName} ${chatPartner.lastName}` : 'Chat Partner'}
-                                className="w-12 h-12 rounded-full border-2 border-white shadow-lg object-cover"
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white shadow-lg object-cover"
                             />
-                            <div className={`absolute bottom-0 right-0 w-4 h-4 border-2 border-white rounded-full ${chatPartner?.isOnline ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                            <div className={`absolute bottom-0 right-0 w-3 h-3 md:w-4 md:h-4 border-2 border-white rounded-full ${chatPartner?.isOnline ? 'bg-green-400' : 'bg-gray-400'}`}></div>
                         </div>
-                        <div>
-                            <h2 className="text-white font-bold text-lg">
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-white font-bold text-sm sm:text-base md:text-lg truncate">
                                 {chatPartner ? `${chatPartner.firstName} ${chatPartner.lastName}` : 'Chat'}
                             </h2>
-                            <p className="text-white text-sm opacity-90">
+                            <p className="text-white text-xs sm:text-sm opacity-90 truncate">
                                 {isPartnerTyping ? (
                                     <span className="text-green-300 font-medium">typing...</span>
                                 ) : (
@@ -569,37 +575,39 @@ const Chat = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all">
-                            <Search className="w-5 h-5" />
+                    {/* Header Actions - All buttons visible on mobile */}
+                    <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 md:p-2 transition-all">
+                            <Search className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
-                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all">
-                            <Phone className="w-5 h-5" />
+                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 md:p-2 transition-all">
+                            <Phone className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
-                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all">
-                            <Video className="w-5 h-5" />
+                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 md:p-2 transition-all">
+                            <Video className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
-                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all">
-                            <MoreVertical className="w-5 h-5" />
+                        <button className="text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 md:p-2 transition-all">
+                            <MoreVertical className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                     </div>
                 </div>
 
+                {/* Messages Container - Responsive padding */}
                 <div
                     ref={messagesContainerRef}
-                    className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50"
+                    className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 bg-gray-50"
                 >
                     {isLoadingMore && (
-                        <div className="flex justify-center py-4">
+                        <div className="flex justify-center py-3 md:py-4">
                             <div className="flex items-center gap-2 text-gray-500">
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span className="text-sm">Loading more messages...</span>
+                                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                                <span className="text-xs md:text-sm">Loading more messages...</span>
                             </div>
                         </div>
                     )}
                     {!hasMore && messages.length > 0 && (
-                        <div className="flex justify-center py-4">
-                            <div className="bg-white px-4 py-2 rounded-full shadow-sm">
+                        <div className="flex justify-center py-3 md:py-4">
+                            <div className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm">
                                 <span className="text-xs text-gray-500">
                                     This is the beginning of your conversation
                                 </span>
@@ -608,11 +616,12 @@ const Chat = () => {
                     )}
 
                     {Object.keys(groupedMessages).map((dateLabel) => (
-                        <div key={dateLabel} className="space-y-4">
-                            <div className="flex items-center justify-center my-6">
+                        <div key={dateLabel} className="space-y-3 md:space-y-4">
+                            {/* Date Divider */}
+                            <div className="flex items-center justify-center my-4 md:my-6">
                                 <div className="flex-1 h-px bg-gray-300"></div>
-                                <div className="px-4">
-                                    <div className="bg-white px-4 py-1 rounded-full shadow-sm">
+                                <div className="px-3 md:px-4">
+                                    <div className="bg-white px-3 py-1 md:px-4 md:py-1 rounded-full shadow-sm">
                                         <span className="text-xs font-semibold text-gray-600">{dateLabel}</span>
                                     </div>
                                 </div>
@@ -630,36 +639,44 @@ const Chat = () => {
                                         key={msg.messageId}
                                         className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`flex items-end gap-2 max-w-[70%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        <div className={`flex items-end gap-1.5 md:gap-2 max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                                            {/* Profile Image - Hidden on mobile for incoming messages */}
                                             {!isOwnMessage && (
-                                                <img
-                                                    src={chatPartner?.profileImage || '/default-avatar.png'}
-                                                    alt={chatPartner?.firstName}
-                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                                                />
+                                                <div className="hidden sm:flex flex-col items-center gap-1 flex-shrink-0">
+                                                    <img
+                                                        src={chatPartner?.profileImage || '/default-avatar.png'}
+                                                        alt={chatPartner?.firstName}
+                                                        className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover"
+                                                    />
+                                                    <span className="text-xs text-gray-500 hidden md:block">{chatPartner?.firstName}</span>
+                                                </div>
                                             )}
+
                                             <div className="flex flex-col gap-1">
+                                                {/* Message Bubble */}
                                                 <div
-                                                    className={`px-4 py-2 rounded-2xl ${isOwnMessage
-                                                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-none'
-                                                        : 'bg-white text-gray-800 rounded-bl-none shadow-md'
+                                                    className={`px-3 py-2 md:px-4 md:py-2 rounded-2xl ${isOwnMessage
+                                                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-none'
+                                                            : 'bg-white text-gray-800 rounded-bl-none shadow-md'
                                                         }`}
                                                 >
                                                     {msg.messageType === 'image' && msg.imageUrl && (
                                                         <img
                                                             src={msg.imageUrl}
                                                             alt="Shared image"
-                                                            className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity mb-2"
-                                                            style={{ maxHeight: '300px', minWidth: '200px' }}
+                                                            className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity mb-1 md:mb-2"
+                                                            style={{ maxHeight: '250px', minWidth: '150px' }}
                                                             onClick={() => setFullscreenImage(msg.imageUrl)}
                                                         />
                                                     )}
                                                     {msg.text && (
-                                                        <p className="text-sm leading-relaxed">{msg.text}</p>
+                                                        <p className="text-xs sm:text-sm leading-relaxed break-words">{msg.text}</p>
                                                     )}
                                                 </div>
+
+                                                {/* Timestamp & Status */}
                                                 <div className={`flex items-center gap-1.5 text-xs text-gray-500 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-                                                    <span>{timeStamp}</span>
+                                                    <span className="text-xs">{timeStamp}</span>
                                                     {isOwnMessage && (
                                                         <MessageStatus status={msg.status} />
                                                     )}
@@ -682,55 +699,67 @@ const Chat = () => {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className="bg-white border-t border-gray-200 px-6 py-4">
+                {/* Input Area - Responsive */}
+                <div className="bg-white border-t border-gray-200 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
+                    {/* Image Preview */}
                     {imagePreview && (
-                        <div className="mb-4 relative inline-block">
+                        <div className="mb-2 md:mb-4 relative inline-block">
                             <div className="relative">
                                 <img
                                     src={imagePreview}
                                     alt="Preview"
-                                    className="rounded-lg max-h-32 object-cover shadow-lg"
+                                    className="rounded-lg max-h-24 md:max-h-32 object-cover shadow-lg"
                                 />
                                 <button
                                     onClick={handleRemoveImage}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
+                                    className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-3 h-3 md:w-4 md:h-4" />
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex items-center gap-3">
-                        <div style={{ position: 'relative' }} ref={emojiPickerRef}>
+                    {/* Input Controls */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                        {/* Emoji Picker */}
+                        <div style={{ position: 'relative' }} ref={emojiPickerRef} className="flex-shrink-0">
                             <button
-                                className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full"
+                                className="text-gray-500 hover:text-purple-600 transition-colors p-1.5 md:p-2 hover:bg-purple-50 rounded-full"
                                 onClick={() => setShowEmojiPicker((prev) => !prev)}
                             >
-                                <Smile className="w-6 h-6" />
+                                <Smile className="w-5 h-5 md:w-6 md:h-6" />
                             </button>
                             {showEmojiPicker && (
-                                <div style={{ position: 'absolute', zIndex: 100, bottom: '50px', left: 0 }}>
+                                <div style={{
+                                    position: 'absolute',
+                                    zIndex: 100,
+                                    bottom: '50px',
+                                    left: 0
+                                }} className="scale-90 sm:scale-100 origin-bottom-left">
                                     <EmojiPicker
                                         onEmojiClick={(emojiData) => {
                                             const emoji = emojiData.emoji || emojiData.native || emojiData;
                                             setNewMessage((prev) => prev + emoji);
                                         }}
-                                        width={350}
-                                        height={400}
+                                        width={280}
+                                        height={350}
                                     />
                                 </div>
                             )}
                         </div>
-                        <div className="relative group">
-                            <button className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full">
-                                <Paperclip className="w-6 h-6" />
+
+                        {/* Paperclip - Now visible on all devices */}
+                        <div className="relative group flex-shrink-0">
+                            <button className="text-gray-500 hover:text-purple-600 transition-colors p-1.5 md:p-2 hover:bg-purple-50 rounded-full">
+                                <Paperclip className="w-5 h-5 md:w-6 md:h-6" />
                             </button>
                             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                Feature is under development..
+                                Under development
                             </span>
                         </div>
 
+                        {/* Image Upload */}
                         <input
                             ref={imageInputRef}
                             type="file"
@@ -740,12 +769,13 @@ const Chat = () => {
                         />
                         <button
                             onClick={() => imageInputRef.current?.click()}
-                            className="text-gray-500 hover:text-purple-600 transition-colors p-2 hover:bg-purple-50 rounded-full"
+                            className="text-gray-500 hover:text-purple-600 transition-colors p-1.5 md:p-2 hover:bg-purple-50 rounded-full flex-shrink-0"
                         >
-                            <ImageIcon className="w-6 h-6" />
+                            <ImageIcon className="w-5 h-5 md:w-6 md:h-6" />
                         </button>
 
-                        <div className="flex-1 relative">
+                        {/* Text Input - Responsive */}
+                        <div className="flex-1 relative min-w-0">
                             <textarea
                                 value={newMessage}
                                 onChange={(e) => {
@@ -756,13 +786,14 @@ const Chat = () => {
                                 onKeyPress={handleKeyPress}
                                 placeholder="Type a message..."
                                 rows="1"
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:outline-none resize-none bg-gray-50 text-gray-800 placeholder-gray-400"
-                                style={{ maxHeight: '120px' }}
+                                className="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:outline-none resize-none bg-gray-50 text-gray-800 placeholder-gray-400 text-sm md:text-base"
+                                style={{ maxHeight: '100px' }}
                             />
                         </div>
 
+                        {/* Send Button */}
                         <button
-                            className="p-3 cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                            className="p-2 md:p-3 cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 flex-shrink-0"
                             disabled={(!newMessage.trim() && !selectedImage) || isUploadingImage}
                             onClick={handleSendMessage}
                         >
@@ -774,12 +805,14 @@ const Chat = () => {
                         </button>
                     </div>
 
-                    <p className="text-xs text-gray-400 mt-2 text-center">
+                    {/* Help Text - Hidden on mobile */}
+                    <p className="text-xs text-gray-400 mt-2 text-center hidden sm:block">
                         Press Enter to send, Shift + Enter for new line
                     </p>
                 </div>
             </div>
 
+            {/* Fullscreen Image Modal */}
             {fullscreenImage && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
@@ -789,7 +822,7 @@ const Chat = () => {
                         onClick={() => setFullscreenImage(null)}
                         className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
                     >
-                        <X className="w-8 h-8" />
+                        <X className="w-6 h-6 md:w-8 md:h-8" />
                     </button>
                     <img
                         src={fullscreenImage}

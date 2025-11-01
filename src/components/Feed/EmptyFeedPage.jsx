@@ -3,7 +3,7 @@ import { Heart, Users, RefreshCw } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addFeed } from '../../utils/slice/feedSlice';
 
-export default function EmptyFeedPage() {
+const EmptyFeedPage = () => {
     const dispatch = useDispatch();
     const getFeedData = useSelector((store) => store.feed);
     const [pulse, setPulse] = useState(0);
@@ -96,4 +96,6 @@ export default function EmptyFeedPage() {
             </div>
         </div>
     );
-}
+};
+
+export default EmptyFeedPage;

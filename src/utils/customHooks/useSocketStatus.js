@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSocketConnection } from '../socket';
-import { updateConnectionStatus } from '../slice/connectionSlice';
+import { updateConnectionStatus, updateUnreadCount, setUnreadCounts } from '../slice/connectionSlice';
 
 const useSocketStatus = (isAuthenticated) => {
     const dispatch = useDispatch();
@@ -11,12 +11,13 @@ const useSocketStatus = (isAuthenticated) => {
     const isOnlineEmitted = useRef(false);
 
     useEffect(() => {
-        // If user is not authenticated, cleanup everything
         if (!isAuthenticated || !userId) {
             if (socketRef.current && isOnlineEmitted.current) {
                 socketRef.current.emit('user-offline', { userId: user?._id });
                 socketRef.current.off('user-status-changed');
                 socketRef.current.off('message-delivered');
+                socketRef.current.off('unread-counts');
+                socketRef.current.off('unread-count-update');
                 socketRef.current.disconnect();
                 socketRef.current = null;
                 isOnlineEmitted.current = false;
@@ -24,11 +25,9 @@ const useSocketStatus = (isAuthenticated) => {
             return;
         }
 
-        // Get or create socket connection (singleton)
         const socket = createSocketConnection();
         socketRef.current = socket;
 
-        // Handler for when socket connects
         const handleConnect = () => {
             if (userId && !isOnlineEmitted.current) {
                 socket.emit('user-online', { userId });
@@ -36,12 +35,10 @@ const useSocketStatus = (isAuthenticated) => {
             }
         };
 
-        // Handler for when socket disconnects
         const handleDisconnect = (reason) => {
             isOnlineEmitted.current = false;
         };
 
-        // Handler for when socket reconnects
         const handleReconnect = () => {
             if (userId) {
                 socket.emit('user-online', { userId });
@@ -49,7 +46,6 @@ const useSocketStatus = (isAuthenticated) => {
             }
         };
 
-        // Handler for user status changes
         const handleStatusChange = ({ userId: changedUserId, isOnline, lastSeen }) => {
             dispatch(updateConnectionStatus({
                 userId: changedUserId,
@@ -58,35 +54,43 @@ const useSocketStatus = (isAuthenticated) => {
             }));
         };
 
-        // Handler for message delivered (global listener)
         const handleMessageDelivered = ({ messageId, deliveredAt }) => {
-            // Dispatch custom event for Chat component to listen
             window.dispatchEvent(new CustomEvent('message-delivered', {
                 detail: { messageId, deliveredAt }
             }));
         };
 
-        // If socket is already connected, emit user-online immediately
+        // Handle initial unread counts when user comes online
+        const handleUnreadCounts = ({ unreadCounts }) => {
+            dispatch(setUnreadCounts(unreadCounts));
+        };
+
+        // Handle real-time unread count updates
+        const handleUnreadCountUpdate = ({ partnerId, unreadCount }) => {
+            dispatch(updateUnreadCount({ userId: partnerId, unreadCount }));
+        };
+
         if (socket.connected && userId && !isOnlineEmitted.current) {
             socket.emit('user-online', { userId });
             isOnlineEmitted.current = true;
         }
 
-        // Attach event listeners
         socket.on('connect', handleConnect);
         socket.on('disconnect', handleDisconnect);
         socket.on('reconnect', handleReconnect);
         socket.on('user-status-changed', handleStatusChange);
         socket.on('message-delivered', handleMessageDelivered);
+        socket.on('unread-counts', handleUnreadCounts);
+        socket.on('unread-count-update', handleUnreadCountUpdate);
 
-        // Cleanup function
         return () => {
-            // Remove only the listeners we added
             socket.off('connect', handleConnect);
             socket.off('disconnect', handleDisconnect);
             socket.off('reconnect', handleReconnect);
             socket.off('user-status-changed', handleStatusChange);
             socket.off('message-delivered', handleMessageDelivered);
+            socket.off('unread-counts', handleUnreadCounts);
+            socket.off('unread-count-update', handleUnreadCountUpdate);
         };
     }, [isAuthenticated, userId, dispatch]);
 

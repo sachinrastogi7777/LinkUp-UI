@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import logo from '../assets/linkup-logo.png'
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -33,26 +33,78 @@ const NavBar = ({ totalRequests }) => {
     }
 
     return (
-        <div className="navbar bg-gradient-to-bl from-gray-900 via-purple-900 to-pink-900 shadow-sm px-4">
-            <div className="h-12 w-24 flex items-center gap-2">
+        <div className="navbar bg-gradient-to-bl from-gray-900 via-purple-900 to-pink-900 shadow-sm px-3 sm:px-4 h-16">
+            <div className="flex-none">
                 <Link to='/'>
                     <img
                         src={logo}
                         alt="LinkUp Logo"
-                        className="h-12 w-24"
+                        className="h-10 w-20 sm:h-12 sm:w-24"
                     />
                 </Link>
             </div>
-            {userData &&
-                <div className="flex gap-5 items-center ml-auto">
-                    {currentPath !== '/requests' && (
-                        <button onClick={() => navigate('/requests')} className="btn btn-primary">{`Requests (${totalRequests})`}</button>
-                    )}
-                    <div className='flex items-center'>
-                        <p className='flex items-center px-2'>{`Welcome, ${userData.firstName}`}</p>
-                        <div className="dropdown dropdown-end mx-5">
+
+            {userData && (
+                <>
+                    {/* Desktop View */}
+                    <div className="hidden md:flex gap-3 lg:gap-5 items-center ml-auto">
+                        {currentPath !== '/requests' && (
+                            <button
+                                onClick={() => navigate('/requests')}
+                                className="btn btn-primary btn-sm lg:btn-md"
+                            >
+                                {`Requests (${totalRequests})`}
+                            </button>
+                        )}
+                        <div className='flex items-center gap-2'>
+                            <p className='text-white text-sm lg:text-base hidden lg:block'>
+                                {`Welcome, ${userData.firstName}`}
+                            </p>
+                            <div className="dropdown dropdown-end">
+                                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                                    <div className="w-8 lg:w-10 rounded-full">
+                                        <img
+                                            alt="user-profile-pic"
+                                            src={userData.profileImage}
+                                        />
+                                    </div>
+                                </div>
+                                <ul
+                                    tabIndex={0}
+                                    className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                                >
+                                    <li>
+                                        <Link to='/profile' className="justify-between">
+                                            Profile
+                                            <span className="badge">New</span>
+                                        </Link>
+                                    </li>
+                                    <li><a>Settings</a></li>
+                                    <li onClick={handleLogOut}><Link>Logout</Link></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile View */}
+                    <div className="flex md:hidden items-center gap-2 ml-auto">
+                        {currentPath !== '/requests' && (
+                            <button
+                                onClick={() => navigate('/requests')}
+                                className="btn btn-primary btn-sm relative"
+                            >
+                                Requests
+                                {totalRequests > 0 && (
+                                    <span className="badge badge-secondary badge-sm absolute -top-2 -right-2">
+                                        {totalRequests}
+                                    </span>
+                                )}
+                            </button>
+                        )}
+
+                        <div className="dropdown dropdown-end">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                                <div className="w-10 rounded-full">
+                                <div className="w-9 rounded-full ring-2 ring-purple-400">
                                     <img
                                         alt="user-profile-pic"
                                         src={userData.profileImage}
@@ -61,12 +113,15 @@ const NavBar = ({ totalRequests }) => {
                             </div>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg"
                             >
+                                <li className="menu-title">
+                                    <span className="text-xs">Hi, {userData.firstName}!</span>
+                                </li>
                                 <li>
                                     <Link to='/profile' className="justify-between">
                                         Profile
-                                        <span className="badge">New</span>
+                                        <span className="badge badge-sm">New</span>
                                     </Link>
                                 </li>
                                 <li><a>Settings</a></li>
@@ -74,8 +129,8 @@ const NavBar = ({ totalRequests }) => {
                             </ul>
                         </div>
                     </div>
-                </div>
-            }
+                </>
+            )}
         </div>
     )
 }

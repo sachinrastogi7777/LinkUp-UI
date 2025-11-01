@@ -41,7 +41,6 @@ const SignUp = () => {
             ...prev,
             [field]: value
         }));
-        // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
@@ -75,11 +74,11 @@ const SignUp = () => {
         }
         const reader = new FileReader();
         reader.onloadend = () => {
-            setProfileImage(reader.result); // base64 string
-            setProfileImageFile(file); //store file for upload
+            setProfileImage(reader.result);
+            setProfileImageFile(file);
             setFormData(prev => ({ ...prev, profileImage: file }));
         }
-        reader.readAsDataURL(file); // Converts to base64
+        reader.readAsDataURL(file);
     }
 
     const handleAddInterest = () => {
@@ -134,7 +133,6 @@ const SignUp = () => {
     const handleSubmit = async () => {
         try {
             setCreateLoading(true);
-            // If user provided a real file, upload it. Otherwise use the default/profileImage URL.
             let profileImageUrl = profileImage;
             if (profileImageFile) {
                 try {
@@ -175,52 +173,48 @@ const SignUp = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8">
             <div className="relative z-10 w-full max-w-2xl">
-                {/* Header */}
-                <div className="text-center mb-8 animate-fade-in-up">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-2xl mb-4">
-                        <Sparkles className="w-10 h-10 text-purple-600" />
+                <div className="text-center mb-6 sm:mb-8 animate-fade-in-up">
+                    <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full shadow-2xl mb-3 sm:mb-4">
+                        <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" />
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Join Our Community</h1>
-                    <p className="text-white text-lg opacity-90">Create your account in 3 simple steps</p>
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 px-2">Join Our Community</h1>
+                    <p className="text-white text-base sm:text-lg opacity-90 px-2">Create your account in 3 simple steps</p>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8 px-2">
                     <div className="flex justify-between mb-2">
                         {[1, 2, 3].map((step) => (
                             <div key={step} className="flex items-center">
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-all duration-300 ${currentStep >= step
+                                <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold transition-all duration-300 ${currentStep >= step
                                     ? 'bg-white text-purple-600 shadow-lg scale-110'
                                     : 'bg-white bg-opacity-30 text-black'
                                     }`}>
-                                    {currentStep > step ? <Check className="w-5 h-5" /> : step}
+                                    {currentStep > step ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : step}
                                 </div>
                                 {step < 3 && (
-                                    <div className={`w-16 md:w-32 h-1 mx-2 transition-all duration-500 ${currentStep > step ? 'bg-white' : 'bg-white bg-opacity-30'
+                                    <div className={`w-8 sm:w-16 md:w-32 h-1 mx-1 sm:mx-2 transition-all duration-500 ${currentStep > step ? 'bg-white' : 'bg-white bg-opacity-30'
                                         }`}></div>
                                 )}
                             </div>
                         ))}
                     </div>
-                    <div className="flex justify-between text-white text-sm font-medium">
+                    <div className="flex justify-between text-white text-xs sm:text-sm font-medium px-1">
                         <span>Account</span>
                         <span>Details</span>
                         <span>Profile</span>
                     </div>
                 </div>
 
-                {/* Form Card */}
-                <div className="bg-white bg-opacity-95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 animate-fade-in-up">
-                    {/* Step 1: Account Basics */}
+                <div className="bg-white bg-opacity-95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 animate-fade-in-up">
                     {currentStep === 1 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                        <div className="space-y-4 sm:space-y-6">
+                            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 sm:mb-6">
                                 Account Basics
                             </h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                                     <div className="relative">
@@ -229,12 +223,12 @@ const SignUp = () => {
                                             type="text"
                                             value={formData.firstName}
                                             onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                            className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.firstName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                            className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.firstName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                                 }`}
                                             placeholder="John"
                                         />
                                     </div>
-                                    {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                                    {errors.firstName && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.firstName}</p>}
                                 </div>
 
                                 <div>
@@ -245,12 +239,12 @@ const SignUp = () => {
                                             type="text"
                                             value={formData.lastName}
                                             onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                            className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.lastName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                            className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.lastName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                                 }`}
                                             placeholder="Doe"
                                         />
                                     </div>
-                                    {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                                    {errors.lastName && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.lastName}</p>}
                                 </div>
                             </div>
 
@@ -262,12 +256,12 @@ const SignUp = () => {
                                         type="text"
                                         value={formData.userName}
                                         onChange={(e) => handleInputChange('userName', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.userName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.userName ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                         placeholder="johndoe123"
                                     />
                                 </div>
-                                {errors.userName && <p className="text-red-500 text-sm mt-1">{errors.userName}</p>}
+                                {errors.userName && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.userName}</p>}
                             </div>
 
                             <div>
@@ -278,12 +272,12 @@ const SignUp = () => {
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => handleInputChange('email', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.email ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.email ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                         placeholder="john@example.com"
                                     />
                                 </div>
-                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                                {errors.email && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.email}</p>}
                             </div>
 
                             <div>
@@ -294,7 +288,7 @@ const SignUp = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.password}
                                         onChange={(e) => handleInputChange('password', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.password ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-12 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.password ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                         placeholder="••••••••"
                                     />
@@ -306,15 +300,14 @@ const SignUp = () => {
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                                {errors.password && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>}
                             </div>
                         </div>
                     )}
 
-                    {/* Step 2: Personal Details */}
                     {currentStep === 2 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                        <div className="space-y-4 sm:space-y-6">
+                            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 sm:mb-6">
                                 Personal Details
                             </h2>
 
@@ -326,10 +319,10 @@ const SignUp = () => {
                                         type="date"
                                         value={formData.dateOfBirth}
                                         onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'}`}
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'}`}
                                     />
                                 </div>
-                                {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
+                                {errors.dateOfBirth && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.dateOfBirth}</p>}
                             </div>
 
                             <div>
@@ -339,7 +332,7 @@ const SignUp = () => {
                                     <select
                                         value={formData.gender}
                                         onChange={(e) => handleInputChange('gender', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors appearance-none cursor-pointer ${errors.gender ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors appearance-none cursor-pointer text-sm sm:text-base ${errors.gender ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                     >
                                         <option value="">Select Gender</option>
@@ -348,7 +341,7 @@ const SignUp = () => {
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
-                                {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+                                {errors.gender && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.gender}</p>}
                             </div>
 
                             <div>
@@ -359,12 +352,12 @@ const SignUp = () => {
                                         type="tel"
                                         value={formData.mobileNumber}
                                         onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.mobileNumber ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.mobileNumber ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                         placeholder="+91 (555) 444-2222"
                                     />
                                 </div>
-                                {errors.mobileNumber && <p className="text-red-500 text-sm mt-1">{errors.mobileNumber}</p>}
+                                {errors.mobileNumber && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.mobileNumber}</p>}
                             </div>
 
                             <div>
@@ -375,50 +368,49 @@ const SignUp = () => {
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => handleInputChange('location', e.target.value)}
-                                        className={`w-full text-black pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.location ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
+                                        className={`w-full text-black pl-12 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:outline-none transition-colors text-sm sm:text-base ${errors.location ? 'border-red-500' : 'border-gray-200 focus:border-purple-500'
                                             }`}
                                         placeholder="New York, USA"
                                     />
                                 </div>
-                                {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+                                {errors.location && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.location}</p>}
                             </div>
                         </div>
                     )}
 
-                    {/* Step 3: Profile Setup */}
                     {currentStep === 3 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                        <div className="space-y-4 sm:space-y-6">
+                            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 sm:mb-6">
                                 Complete Your Profile
                             </h2>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                                <div className="flex flex-col items-center gap-4">
+                                <div className="flex flex-col items-center gap-3 sm:gap-4">
                                     <div className="relative group">
                                         {profileImage ? (
                                             <img
                                                 src={profileImage}
                                                 alt="Profile Preview"
-                                                className="w-32 h-32 rounded-full object-cover border-4 border-purple-200 shadow-lg"
+                                                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-purple-200 shadow-lg"
                                             />
                                         ) : (
-                                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center border-4 border-purple-300">
-                                                <Camera className="w-12 h-12 text-purple-600" />
+                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center border-4 border-purple-300">
+                                                <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-purple-600" />
                                             </div>
                                         )}
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-50 rounded-full transition-all duration-300 flex items-center justify-center"
+                                            className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-full transition-all duration-300 flex items-center justify-center"
                                         >
-                                            <Upload className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                         </button>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-medium hover:bg-purple-200 transition-colors"
+                                        className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-medium hover:bg-purple-200 transition-colors text-sm sm:text-base"
                                     >
                                         {profileImage ? 'Change Photo' : 'Upload Photo'}
                                     </button>
@@ -438,7 +430,7 @@ const SignUp = () => {
                                     {formData.interests.map((interest, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-sm font-medium"
+                                            className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-xs sm:text-sm font-medium"
                                         >
                                             {interest}
                                             <button
@@ -458,12 +450,12 @@ const SignUp = () => {
                                         onChange={(e) => setNewInterest(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddInterest())}
                                         placeholder="Add interest..."
-                                        className="flex-1 text-black px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                                        className="flex-1 text-black px-3 sm:px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-sm sm:text-base"
                                     />
                                     <button
                                         type="button"
                                         onClick={handleAddInterest}
-                                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                                        className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all text-sm sm:text-base whitespace-nowrap"
                                     >
                                         Add
                                     </button>
@@ -476,54 +468,53 @@ const SignUp = () => {
                                     value={formData.about}
                                     onChange={(e) => handleInputChange('about', e.target.value)}
                                     rows={4}
-                                    className="w-full text-black px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                                    className="w-full text-black px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none text-sm sm:text-base"
                                     placeholder="Tell us about yourself..."
                                 />
                             </div>
                         </div>
                     )}
 
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                    <div className="flex justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
                         {currentStep > 1 && (
                             <button
                                 onClick={handleBack}
-                                className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300"
+                                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 text-sm sm:text-base"
                             >
                                 <ArrowLeft className="w-4 h-4" />
-                                Back
+                                <span className="hidden xs:inline">Back</span>
                             </button>
                         )}
 
                         {currentStep < 3 ? (
                             <button
                                 onClick={handleNext}
-                                className="ml-auto flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="ml-auto flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
                             >
-                                Next
+                                <span className="hidden xs:inline">Next</span>
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         ) : (
                             <button
                                 onClick={handleSubmit}
                                 disabled={createLoading}
-                                className="ml-auto flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="ml-auto flex items-center gap-2 px-4 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 {createLoading ? (
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 ) : (
                                     <Check className="w-4 h-4" />
                                 )}
-                                {createLoading ? `Creating Profile` : `Create Account`}
+                                <span className="hidden xs:inline">{createLoading ? 'Creating...' : 'Create Account'}</span>
+                                <span className="xs:hidden">{createLoading ? 'Creating...' : 'Create'}</span>
                             </button>
                         )}
                     </div>
                 </div>
 
-                {/* Footer */}
-                <p className="text-center text-white mt-6">
+                <p className="text-center text-white mt-4 sm:mt-6 text-sm sm:text-base px-2">
                     Already have an account?{' '}
-                    <Link to="/login" className="font-semibold underline text-sm text-gray-800 hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-indigo-500 hover:bg-clip-text hover:text-transparent transition-colors">
+                    <Link to="/login" className="font-semibold underline text-gray-800 hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-indigo-500 hover:bg-clip-text hover:text-transparent transition-colors">
                         Sign In
                     </Link>
                 </p>
