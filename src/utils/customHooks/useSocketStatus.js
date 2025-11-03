@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createSocketConnection } from '../socket';
+import { createSocketConnection, disconnectSocket } from '../socket';
 import { updateConnectionStatus, updateUnreadCount, setUnreadCounts } from '../slice/connectionSlice';
 
 const useSocketStatus = (isAuthenticated) => {
@@ -9,6 +9,7 @@ const useSocketStatus = (isAuthenticated) => {
     const userId = user?._id;
     const socketRef = useRef(null);
     const isOnlineEmitted = useRef(false);
+    const listenersAttached = useRef(false);
 
     useEffect(() => {
         if (!isAuthenticated || !userId) {
@@ -18,9 +19,10 @@ const useSocketStatus = (isAuthenticated) => {
                 socketRef.current.off('message-delivered');
                 socketRef.current.off('unread-counts');
                 socketRef.current.off('unread-count-update');
-                socketRef.current.disconnect();
+                disconnectSocket();
                 socketRef.current = null;
                 isOnlineEmitted.current = false;
+                listenersAttached.current = false;
             }
             return;
         }
@@ -60,37 +62,42 @@ const useSocketStatus = (isAuthenticated) => {
             }));
         };
 
-        // Handle initial unread counts when user comes online
         const handleUnreadCounts = ({ unreadCounts }) => {
             dispatch(setUnreadCounts(unreadCounts));
         };
 
-        // Handle real-time unread count updates
         const handleUnreadCountUpdate = ({ partnerId, unreadCount }) => {
             dispatch(updateUnreadCount({ userId: partnerId, unreadCount }));
         };
 
-        if (socket.connected && userId && !isOnlineEmitted.current) {
-            socket.emit('user-online', { userId });
-            isOnlineEmitted.current = true;
+        if (!listenersAttached.current) {
+            if (socket.connected && userId && !isOnlineEmitted.current) {
+                socket.emit('user-online', { userId });
+                isOnlineEmitted.current = true;
+            }
+
+            socket.on('connect', handleConnect);
+            socket.on('disconnect', handleDisconnect);
+            socket.on('reconnect', handleReconnect);
+            socket.on('user-status-changed', handleStatusChange);
+            socket.on('message-delivered', handleMessageDelivered);
+            socket.on('unread-counts', handleUnreadCounts);
+            socket.on('unread-count-update', handleUnreadCountUpdate);
+
+            listenersAttached.current = true;
         }
 
-        socket.on('connect', handleConnect);
-        socket.on('disconnect', handleDisconnect);
-        socket.on('reconnect', handleReconnect);
-        socket.on('user-status-changed', handleStatusChange);
-        socket.on('message-delivered', handleMessageDelivered);
-        socket.on('unread-counts', handleUnreadCounts);
-        socket.on('unread-count-update', handleUnreadCountUpdate);
-
         return () => {
-            socket.off('connect', handleConnect);
-            socket.off('disconnect', handleDisconnect);
-            socket.off('reconnect', handleReconnect);
-            socket.off('user-status-changed', handleStatusChange);
-            socket.off('message-delivered', handleMessageDelivered);
-            socket.off('unread-counts', handleUnreadCounts);
-            socket.off('unread-count-update', handleUnreadCountUpdate);
+            if (socket) {
+                socket.off('connect', handleConnect);
+                socket.off('disconnect', handleDisconnect);
+                socket.off('reconnect', handleReconnect);
+                socket.off('user-status-changed', handleStatusChange);
+                socket.off('message-delivered', handleMessageDelivered);
+                socket.off('unread-counts', handleUnreadCounts);
+                socket.off('unread-count-update', handleUnreadCountUpdate);
+                listenersAttached.current = false;
+            }
         };
     }, [isAuthenticated, userId, dispatch]);
 

@@ -95,7 +95,7 @@ const SentRequests = (props) => {
                                         key={request._id}
                                         className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-lg border border-gray-100"
                                     >
-                                        <div className="flex flex-col gap-3 sm:gap-4">
+                                        <div className="flex md:hidden flex-col gap-3 sm:gap-4">
                                             <div className="flex items-start gap-2.5 sm:gap-3 lg:gap-4">
                                                 <img
                                                     src={request.toUserId.profileImage}
@@ -138,6 +138,56 @@ const SentRequests = (props) => {
                                                             <Loader className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                                                         ) : (
                                                             <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                        )}
+                                                        {loadingRequestId === request._id ? 'Processing...' : 'Cancel'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Tablet & Desktop Layout: Buttons on Right */}
+                                        <div className="hidden md:flex items-start gap-4">
+                                            <img
+                                                src={request.toUserId.profileImage}
+                                                alt={request.toUserId.firstName + ' ' + request.toUserId.lastName}
+                                                className="w-14 h-14 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-white shadow-lg flex-shrink-0"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-wrap items-center gap-1.5 lg:gap-2 mb-2">
+                                                    <h3 className="text-base lg:text-lg font-bold text-gray-800 truncate">{request.toUserId.firstName + ' ' + request.toUserId.lastName}</h3>
+                                                    <span className="text-sm text-gray-500 truncate font-medium">{`@${request.toUserId.userName}`}</span>
+                                                </div>
+                                                <p className="text-sm text-gray-400 mb-2">• {calculateTimeDiff}</p>
+                                                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">{request.toUserId.about}</p>
+
+                                                <div className="flex flex-wrap gap-3 lg:gap-4 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-1">
+                                                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                                                        <span className="truncate">{request.toUserId.location}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="w-4 h-4 flex-shrink-0" />
+                                                        <span className="truncate">Joined {joinDate}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Buttons Column - Right Aligned */}
+                                            <div className="flex flex-col gap-2.5 items-end flex-shrink-0">
+                                                <div className="px-4 py-2 rounded-full text-sm font-medium text-yellow-600 bg-yellow-100 min-w-[120px] text-center">
+                                                    Pending
+                                                </div>
+
+                                                {request.status === 'interested' && (
+                                                    <button
+                                                        onClick={() => handleCancelRequest(request, request._id)}
+                                                        className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-w-[120px]"
+                                                        disabled={loadingRequestId === request._id}
+                                                    >
+                                                        {loadingRequestId === request._id ? (
+                                                            <Loader className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <X className="w-4 h-4" />
                                                         )}
                                                         {loadingRequestId === request._id ? 'Processing...' : 'Cancel'}
                                                     </button>
