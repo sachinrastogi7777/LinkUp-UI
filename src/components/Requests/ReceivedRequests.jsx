@@ -97,7 +97,7 @@ const ReceivedRequests = ({ onLengthChange, isLoadingReceived = false, isPremium
                                     const joinDate = formattedDate(request.fromUserId.createdAt);
                                     return (
                                         <div key={request._id} className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-lg border border-gray-100">
-                                            <div className="flex flex-col gap-3 sm:gap-4">
+                                            <div className="flex md:hidden flex-col gap-3 sm:gap-4">
                                                 <div className="flex items-start gap-2.5 sm:gap-3 lg:gap-4">
                                                     <img src={request.fromUserId.profileImage} alt={`${request.fromUserId.firstName} ${request.fromUserId.lastName}`} className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-white shadow-lg flex-shrink-0" />
                                                     <div className="flex-1 min-w-0">
@@ -146,6 +146,66 @@ const ReceivedRequests = ({ onLengthChange, isLoadingReceived = false, isPremium
                                                             setIsModalOpen(true);
                                                             setRequestId(request._id);
                                                         }}>
+                                                        View Profile
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Tablet & Desktop Layout: Buttons on Right */}
+                                            <div className="hidden md:flex items-start gap-4">
+                                                <img src={request.fromUserId.profileImage} alt={`${request.fromUserId.firstName} ${request.fromUserId.lastName}`} className="w-14 h-14 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-white shadow-lg flex-shrink-0" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-1.5 lg:gap-2 mb-2">
+                                                        <h3 className="text-base lg:text-lg font-bold text-gray-800 truncate">{`${request.fromUserId.firstName} ${request.fromUserId.lastName}`}</h3>
+                                                        <span className="text-sm text-gray-500 truncate font-medium">{`@${request.fromUserId.userName}`}</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-400 mb-2">• {calculateTimeDiff}</p>
+                                                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">{request.fromUserId.about}</p>
+
+                                                    <div className="flex flex-wrap gap-3 lg:gap-4 text-sm text-gray-500">
+                                                        <div className="flex items-center gap-1">
+                                                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                                                            <span className="truncate">{request.fromUserId.location}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                                                            <span className="truncate">Joined {joinDate}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Buttons Column - Right Aligned */}
+                                                <div className="flex flex-col gap-2.5 items-end flex-shrink-0 min-w-[140px]">
+                                                    {!(loadingRequestId === request._id && processingType === 'decline') && (
+                                                        <button
+                                                            onClick={() => reviewedRequests('accepted', request._id)}
+                                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl text-sm font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                                            disabled={loadingRequestId === request._id}
+                                                        >
+                                                            {loadingRequestId === request._id && processingType === 'accept' ? <Loader className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                                                            {loadingRequestId === request._id && processingType === 'accept' ? 'Processing...' : 'Accept'}
+                                                        </button>
+                                                    )}
+
+                                                    {!(loadingRequestId === request._id && processingType === 'accept') && (
+                                                        <button
+                                                            onClick={() => reviewedRequests('rejected', request._id)}
+                                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                                            disabled={loadingRequestId === request._id}
+                                                        >
+                                                            {loadingRequestId === request._id && processingType === 'decline' ? <Loader className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                                                            {loadingRequestId === request._id && processingType === 'decline' ? 'Processing...' : 'Decline'}
+                                                        </button>
+                                                    )}
+
+                                                    <button
+                                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                                        onClick={() => {
+                                                            setSelectedUser(request.fromUserId);
+                                                            setIsModalOpen(true);
+                                                            setRequestId(request._id);
+                                                        }}
+                                                    >
                                                         View Profile
                                                     </button>
                                                 </div>

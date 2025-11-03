@@ -13,6 +13,8 @@ import Chat from "./components/Chat/Chat";
 import useHeartbeat from "./utils/customHooks/useHeartbeat";
 import useOfflineStatus from "./utils/customHooks/useOfflineStatus";
 import useSocketStatus from "./utils/customHooks/useSocketStatus";
+import ChatPage from "./components/Chat/ChatPage";
+import useChatsGlobal from "./utils/customHooks/useChatsGlobal";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -20,6 +22,7 @@ const AppContent = () => {
 	useHeartbeat(isAuthenticated);
 	useOfflineStatus(isAuthenticated);
 	useSocketStatus(isAuthenticated);
+	useChatsGlobal();
 
 	return (
 		<BrowserRouter basename='/'>
@@ -33,6 +36,7 @@ const AppContent = () => {
 					<Route path='/' element={<Feed />} />
 					<Route path='/forgot-password' element={<ForgotPassword />} />
 					<Route path='/chat/:userId' element={<Chat />} />
+					<Route path='/chats' element={<ChatPage />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>

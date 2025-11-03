@@ -4,6 +4,7 @@ import connectionReducer from './slice/connectionSlice';
 import requestReducer from './slice/requestSlice';
 import sentRequestReducer from './slice/sentRequestSlice';
 import feedReducer from './slice/feedSlice';
+import chatReducer from './slice/chatSlice';
 
 const loadState = () => {
     try {
@@ -37,7 +38,8 @@ const appStore = configureStore({
         connection: connectionReducer,
         request: requestReducer,
         sentRequest: sentRequestReducer,
-        feed: feedReducer
+        feed: feedReducer,
+        chats: chatReducer
     },
     preloadedState
 });
