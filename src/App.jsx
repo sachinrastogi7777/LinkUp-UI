@@ -15,6 +15,7 @@ import useOfflineStatus from "./utils/customHooks/useOfflineStatus";
 import useSocketStatus from "./utils/customHooks/useSocketStatus";
 import ChatPage from "./components/Chat/ChatPage";
 import useChatsGlobal from "./utils/customHooks/useChatsGlobal";
+import AuthCallback from "./components/Auth/AuthCallback";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -37,6 +38,7 @@ const AppContent = () => {
 					<Route path='/forgot-password' element={<ForgotPassword />} />
 					<Route path='/chat/:userId' element={<Chat />} />
 					<Route path='/chats' element={<ChatPage />} />
+					<Route path='/auth/callback' element={<AuthCallback />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>

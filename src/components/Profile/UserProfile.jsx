@@ -142,11 +142,11 @@ const UserProfile = ({ isPremium = false }) => {
                                     <div className='text-gray-700 font-medium min-h-16 sm:min-h-20'>
                                         {(gender || dateOfBirth) && (
                                             <div className='flex flex-wrap justify-center sm:justify-start gap-2 text-sm sm:text-base'>
-                                                <p className='leading-relaxed whitespace-pre-line mt-2 mb-1'>{`${gender},`}</p>
-                                                <p className="flex items-center gap-1 mt-2 mb-1">
+                                                {gender && <p className='leading-relaxed whitespace-pre-line mt-2 mb-1'>{`${gender},`}</p>}
+                                                {dateOfBirth && <p className="flex items-center gap-1 mt-2 mb-1">
                                                     <Cake className='w-3.5 h-3.5 sm:w-4 sm:h-4' />
                                                     {`${formatedDOB}`}
-                                                </p>
+                                                </p>}
                                             </div>
                                         )}
                                         {about && (
@@ -430,10 +430,10 @@ const UserProfile = ({ isPremium = false }) => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row flex-wrap justify-center sm:justify-start gap-3 sm:gap-6 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-100">
-                            <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 text-sm sm:text-base">
+                            {location && <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 text-sm sm:text-base">
                                 <MapPin className="w-4 h-4" />
                                 {location}
-                            </div>
+                            </div>}
                             <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 text-sm sm:text-base">
                                 <Calendar className="w-4 h-4" />
                                 Joined {joinDate}
