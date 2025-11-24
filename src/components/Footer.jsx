@@ -23,7 +23,7 @@ const Footer = () => {
             { name: 'FAQs', path: '/faq' }
         ],
         legal: [
-            { name: 'Privacy Policy', path: '/privacy' },
+            { name: 'Privacy Policy', path: '/privacy-policy' },
             { name: 'Terms of Service', path: '/terms' },
             { name: 'Cookie Policy', path: '/cookies' },
             { name: 'Community Guidelines', path: '/guidelines' }
@@ -254,10 +254,10 @@ const Footer = () => {
                                 <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                                 <span>Help</span>
                             </a>
-                            <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
+                            <Link to="/privacy-policy" className="hover:text-white transition-colors flex items-center gap-1">
                                 <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
-                                <span>Privacy</span>
-                            </a>
+                                <span>Privacy Policy</span>
+                            </Link>
                             <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
                                 <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                                 <span>Terms</span>
