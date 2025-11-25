@@ -17,6 +17,7 @@ import ChatPage from "./components/Chat/ChatPage";
 import useChatsGlobal from "./utils/customHooks/useChatsGlobal";
 import AuthCallback from "./components/Auth/AuthCallback";
 import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -41,7 +42,8 @@ const AppContent = () => {
 					<Route path='/chats' element={<ChatPage />} />
 				</Route>
 				<Route path='/auth/callback' element={<AuthCallback />} />
-				<Route path="/privacy-policy" element={<PrivacyPolicy />} />
+				<Route path='/privacy-policy' element={<PrivacyPolicy />} />
+				<Route path='/terms-service' element={<TermsOfService />} />
 			</Routes>
 		</BrowserRouter>
 	);

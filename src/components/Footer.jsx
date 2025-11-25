@@ -24,7 +24,7 @@ const Footer = () => {
         ],
         legal: [
             { name: 'Privacy Policy', path: '/privacy-policy' },
-            { name: 'Terms of Service', path: '/terms' },
+            { name: 'Terms of Service', path: '/terms-service' },
             { name: 'Cookie Policy', path: '/cookies' },
             { name: 'Community Guidelines', path: '/guidelines' }
         ],
@@ -258,10 +258,10 @@ const Footer = () => {
                                 <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
                                 <span>Privacy Policy</span>
                             </Link>
-                            <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
+                            <Link to="/terms-service" className="hover:text-white transition-colors flex items-center gap-1">
                                 <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                                 <span>Terms</span>
-                            </a>
+                            </Link>
                             <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
                                 <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                                 <span className="hidden xs:inline">Community</span>
