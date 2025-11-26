@@ -42,15 +42,12 @@ const AuthCallback = () => {
 
             if (success === 'true') {
                 try {
-                    // Fetch user profile
                     const profileResponse = await axios.get(`${BASE_URL}/profile/view`, {
                         withCredentials: true
                     });
 
                     if (profileResponse.data) {
                         dispatch(addUser(profileResponse.data));
-
-                        // Fetch received requests
                         try {
                             const receivedRequestsData = await axios.get(`${BASE_URL}/user/requests/received`, {
                                 withCredentials: true
@@ -60,7 +57,6 @@ const AuthCallback = () => {
                             console.log('Failed to fetch received requests:', err);
                         }
 
-                        // Fetch sent requests
                         try {
                             const sentRequestsData = await axios.get(`${BASE_URL}/user/requests/sent`, {
                                 withCredentials: true
