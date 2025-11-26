@@ -16,8 +16,9 @@ import useSocketStatus from "./utils/customHooks/useSocketStatus";
 import ChatPage from "./components/Chat/ChatPage";
 import useChatsGlobal from "./utils/customHooks/useChatsGlobal";
 import AuthCallback from "./components/Auth/AuthCallback";
-import PrivacyPolicy from "./components/PrivacyPolicy";
-import TermsOfService from "./components/TermsOfService";
+import PrivacyPolicy from "./components/Footer/PrivacyPolicy";
+import TermsOfService from "./components/Footer/TermsOfService";
+import { AboutUs } from "./components/Footer/About";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -44,6 +45,7 @@ const AppContent = () => {
 				<Route path='/auth/callback' element={<AuthCallback />} />
 				<Route path='/privacy-policy' element={<PrivacyPolicy />} />
 				<Route path='/terms-service' element={<TermsOfService />} />
+				<Route path='/about' element={<AboutUs />} />
 			</Routes>
 		</BrowserRouter>
 	);

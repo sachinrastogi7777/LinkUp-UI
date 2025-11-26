@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import NavBar from './NavBar'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { toast, ToastContainer } from 'react-toastify'
-import Footer from './Footer'
+import Footer from './Footer/Footer'
 import { addUser } from '../utils/slice/userSlice'
 import axios from 'axios'
 import { BASE_URL } from '../utils/constants'
@@ -27,38 +27,52 @@ const Body = () => {
     }, [sentRequestsList]);
 
     useEffect(() => {
-    const publicRoutes = ['/login', '/signup', '/forgot-password'];
-        const isPublicRoute = publicRoutes.includes(location.pathname);
+        const publicRoutes = ['/login', '/signup', '/forgot-password', '/auth/callback', '/privacy-policy', '/terms-service', '/about'];
+        const publicFeedRoutes = ['/'];
 
-        if (isPublicRoute || userData) {
+        const isPublicRoute = publicRoutes.includes(location.pathname);
+        const isPublicFeedRoute = publicFeedRoutes.includes(location.pathname);
+
+        const protectedRoutes = ['/profile', '/profile/edit', '/requests', '/chats', '/chat'];
+        const isProtectedRoute = protectedRoutes.some(route => location.pathname.startsWith(route));
+
+        if ((isPublicRoute || isPublicFeedRoute) && !isProtectedRoute) {
+            if (!userData) {
+                const silentFetchUser = async () => {
+                    try {
+                        const res = await axios.get(BASE_URL + '/profile/view', { withCredentials: true });
+                        dispatch(addUser(res.data));
+                    } catch (error) {
+                    }
+                };
+                silentFetchUser();
+            }
             return;
         }
-        const fetchUser = async () => {
-            try {
-                const res = await axios.get(BASE_URL + '/profile/view', { withCredentials: true });
-                dispatch(addUser(res.data));
-            }
-            catch (error) {
-                if (error.status === 401) {
-                    const manualLogout = localStorage.getItem('manualLogout');
-                    if (!manualLogout) {
-                        toast.error('Session expired. Please log in again.', {
+
+        if (isProtectedRoute && !userData) {
+            const fetchUser = async () => {
+                try {
+                    const res = await axios.get(BASE_URL + '/profile/view', { withCredentials: true });
+                    dispatch(addUser(res.data));
+                } catch (error) {
+                    if (error.status === 401) {
+                        toast.error('Please login to access this page.', {
                             position: 'top-center',
                             autoClose: 2000,
                             hideProgressBar: false,
                             closeOnClick: false,
                             pauseOnHover: true,
                             draggable: false,
-                            progress: undefined,
                         });
+                        navigate('/login');
                     }
-                    localStorage.removeItem('manualLogout');
-                    navigate('/login');
                 }
-            }
-        };
-        fetchUser();
+            };
+            fetchUser();
+        }
     }, [dispatch, navigate, location.pathname, userData])
+
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
             <NavBar

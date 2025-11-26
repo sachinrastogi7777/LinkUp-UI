@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Shield, FileText, HelpCircle, Users, Send, Copyright } from 'lucide-react';
-import logo from '../assets/linkup-icon.png'
+// import logo from '../assets/linkup-icon.png'
+import logo from '../../assets/linkup-icon.png';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 

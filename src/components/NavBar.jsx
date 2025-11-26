@@ -9,7 +9,7 @@ import { removeConnection } from '../utils/slice/connectionSlice';
 import { removeRequest } from '../utils/slice/requestSlice';
 import { removeSentRequest } from '../utils/slice/sentRequestSlice';
 import { removeFeed } from '../utils/slice/feedSlice';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, LogIn, UserPlus } from 'lucide-react';
 
 const NavBar = ({ totalRequests }) => {
     const userData = useSelector((store) => store.user);
@@ -49,6 +49,25 @@ const NavBar = ({ totalRequests }) => {
                     />
                 </Link>
             </div>
+
+            {!userData && currentPath === '/' && (
+                <div className="flex gap-2 sm:gap-3 items-center ml-auto">
+                    <Link
+                        to="/login"
+                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full transition-all duration-300 font-medium text-sm border border-white border-opacity-20 backdrop-blur-sm"
+                    >
+                        <LogIn className="w-4 h-4" />
+                        <span className="xs:hidden xs:inline">Login</span>
+                    </Link>
+                    <Link
+                        to="/signup"
+                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-xl"
+                    >
+                        <UserPlus className="w-4 h-4" />
+                        <span className="xd:hidden xs:inline">Sign Up</span>
+                    </Link>
+                </div>
+            )}
 
             {userData && (
                 <>
