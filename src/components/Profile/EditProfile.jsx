@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { AtSign, Calendar, Camera, ChevronDown, Heart, Mail, MapPin, Phone, Save, Upload, User, X } from 'lucide-react';
 import React, { useRef, useState, useEffect } from 'react'
+import axios from 'axios';
+import { AtSign, Camera, ChevronDown, Heart, Mail, MapPin, Phone, Save, Upload, User, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';

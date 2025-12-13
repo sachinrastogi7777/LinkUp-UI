@@ -1,22 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Cake, Calendar, Loader2, Lock, MapPin, Users, X } from 'lucide-react';
+import { Cake, Calendar, Loader2, MapPin, Users, X } from 'lucide-react';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constants';
-import { formattedDate, getTimeAgo } from '../../utils/helper';
+import { formattedDate } from '../../utils/helper';
 import ConnectionShimmer from '../Shimmer/ConnectionShimmer';
+import PremiumWarning from './PremiumWarning';
+import Pagination from './Pagination';
 
 const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction, clickFrom, requestId }) => {
     const [connectionList, setConnectionList] = useState([]);
     const [isLoadingConnections, setIsLoadingConnections] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalPages: 0,
+        totalConnections: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
+        limit: 5
+    });
     const { firstName, lastName, dateOfBirth, gender, about, profileImage, userName, interests, location, createdAt, coverImage, _id, isOnline } = user;
 
-    const userConnections = async (targetUserId) => {
+    const userConnections = async (targetUserId, page = 1) => {
         if (!targetUserId) return;
         try {
             setIsLoadingConnections(true);
-            const connectionList = await axios.get(`${BASE_URL}/user/connections/${targetUserId}`, { withCredentials: true });
-            setConnectionList(connectionList.data.userConnection);
+            const response = await axios.get(
+                `${BASE_URL}/user/connections/${targetUserId}?page=${page}&limit=5`,
+                { withCredentials: true }
+            );
+            if (response) {
+                setConnectionList(response.data.userConnection);
+                if (response.data.pagination) {
+                    setPagination(response.data.pagination);
+                }
+            }
         } catch (error) {
             console.error("Error fetching connections:", error);
         } finally {
@@ -26,18 +45,28 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction, clickFrom, r
 
     useEffect(() => {
         if (isOpen && _id) {
-            userConnections(_id);
+            userConnections(_id, currentPage);
         }
-    }, [isOpen, _id]);
+    }, [isOpen, _id, currentPage]);
+
+    useEffect(() => {
+        if (isOpen) {
+            setCurrentPage(1);
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
     const formatedDOB = formattedDate(dateOfBirth);
     const joinDate = formattedDate(createdAt);
 
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
     const modalContent = (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-2 sm:p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur p-2 sm:p-4"
             onClick={onClose}
         >
             <div
@@ -128,7 +157,7 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction, clickFrom, r
                             {isPremium && (
                                 <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
                                     <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    <span className="text-sm sm:text-xl">{`Connections (${connectionList?.length || 0})`}</span>
+                                    <span className="text-sm sm:text-xl">{`Connections (${pagination.totalConnections || 0})`}</span>
                                     {isLoadingConnections && (
                                         <Loader2 className="w-4 h-4 animate-spin text-purple-600 ml-2" />
                                     )}
@@ -136,60 +165,66 @@ const ProfileModal = ({ isOpen, onClose, user, isPremium, onAction, clickFrom, r
                             )}
 
                             {isPremium ? (
-                                isLoadingConnections ? (
-                                    <ConnectionShimmer />
-                                ) : connectionList && connectionList.length > 0 ? (
-                                    <div className="space-y-2 sm:space-y-3">
-                                        {connectionList.map((connection, index) => {
-                                            const calculateTimeDiff = getTimeAgo(connection.connectedAt);
-                                            return (
-                                                <div
-                                                    key={connection.connectionId}
-                                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:translate-x-0 sm:hover:translate-x-2 opacity-0 animate-fadeInUp"
-                                                    style={{
-                                                        animation: `fadeInUp 0.5s ease-out forwards`,
-                                                        animationDelay: `${index * 0.1}s`
-                                                    }}
-                                                >
-                                                    <div className='flex items-center gap-2 sm:gap-3'>
-                                                        <div className="relative">
-                                                            <img
-                                                                src={connection.user.profileImage}
-                                                                alt='Profile Pic'
-                                                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                                                            />
+                                <>
+                                    {isLoadingConnections ? (
+                                        <ConnectionShimmer />
+                                    ) : connectionList && connectionList.length > 0 ? (
+                                        <div className="space-y-2 sm:space-y-3">
+                                            {connectionList.map((connection, index) => {
+                                                return (
+                                                    <div
+                                                        key={connection.connectionId}
+                                                        className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-xl hover:bg-purple-50 transition-all duration-200 hover:shadow-md border border-transparent hover:border-purple-200'
+                                                        style={{
+                                                            animation: `fadeInUp 0.3s ease-out forwards`,
+                                                            animationDelay: `${index * 0.05}s`,
+                                                            opacity: 0
+                                                        }}
+                                                    >
+                                                        <div className='flex items-center gap-2 sm:gap-3'>
+                                                            <div className="relative">
+                                                                <img
+                                                                    src={connection.user.profileImage}
+                                                                    alt='Profile Pic'
+                                                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-medium text-gray-700 text-sm sm:text-base">{`${connection.user.firstName} ${connection.user.lastName}`}</span>
+                                                                <span className="text-xs sm:text-sm text-gray-500">{`@${connection.user.userName}`}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium text-gray-700 text-sm sm:text-base">{`${connection.user.firstName} ${connection.user.lastName}`}</span>
-                                                            <span className="text-xs sm:text-sm text-gray-500">{`@${connection.user.userName}`}</span>
-                                                        </div>
+                                                        {connection.user.location && (
+                                                            <div className='text-xs sm:text-sm text-gray-500 ml-14 sm:ml-0 flex gap-2'>
+                                                                <MapPin className="w-4 h-4" />
+                                                                <span>{connection.user.location}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div className='text-xs sm:text-sm text-gray-500 ml-14 sm:ml-0'>{`Connected Since ${calculateTimeDiff}`}</div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-6 sm:py-8">
-                                        <Users className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-2 sm:mb-3" />
-                                        <p className="text-gray-500 font-medium text-sm sm:text-base">User don't have any connections.</p>
-                                    </div>
-                                )
-                            ) : (
-                                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 p-6 sm:p-8 text-center">
-                                    <div className="absolute inset-0 backdrop-blur-md bg-white/30"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center">
-                                            <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                                                );
+                                            })}
                                         </div>
-                                        <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Unlock Connections</h3>
-                                        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-2">Upgrade to Premium to see who's connected with this user</p>
-                                        <button className="px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm sm:text-base">
-                                            Get Premium for $5/month
-                                        </button>
-                                        <p className="text-xs text-gray-500 mt-3 sm:mt-4">✨ Unlock exclusive features and connections</p>
-                                    </div>
-                                </div>
+                                    ) : (
+                                        <div className="text-center py-6 sm:py-8">
+                                            <Users className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-2 sm:mb-3" />
+                                            <p className="text-gray-500 font-medium text-sm sm:text-base">User doesn't have any connections.</p>
+                                        </div>
+                                    )}
+
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={pagination.totalPages}
+                                        totalItems={pagination.totalConnections}
+                                        itemsPerPage={pagination.limit}
+                                        onPageChange={handlePageChange}
+                                        hasNextPage={pagination.hasNextPage}
+                                        hasPrevPage={pagination.hasPrevPage}
+                                        showPageInfo={true}
+                                        itemName="connections"
+                                    />
+                                </>
+                            ) : (
+                                <PremiumWarning />
                             )}
                         </div>
 

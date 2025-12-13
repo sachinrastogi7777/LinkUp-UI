@@ -103,7 +103,6 @@ const Login = () => {
                     <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2 px-2">Welcome Back</h1>
                     <p className="text-white text-sm sm:text-base md:text-lg opacity-90 px-4">Sign in to continue your journey</p>
                 </div>
-
                 <div className="bg-white bg-opacity-95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 animate-fade-in-up">
                     <h2 className="text-xl sm:text-2xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-5 sm:mb-6">
                         Sign In
@@ -130,7 +129,6 @@ const Login = () => {
                                 <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.email}</p>
                             )}
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                                 Password *
@@ -163,15 +161,7 @@ const Login = () => {
                                 <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>
                             )}
                         </div>
-
-                        <div className="flex items-center justify-between gap-2">
-                            <label className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                                />
-                                <span className="ml-2 text-xs sm:text-sm text-gray-600">Remember me</span>
-                            </label>
+                        <div className="flex justify-end">
                             <Link
                                 to="/forgot-password"
                                 className="text-xs sm:text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors whitespace-nowrap"
@@ -179,7 +169,6 @@ const Login = () => {
                                 Forgot Password?
                             </Link>
                         </div>
-
                         <button
                             type="submit"
                             disabled={loginLoading}
@@ -193,7 +182,6 @@ const Login = () => {
                             {loginLoading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
-
                     <div className="mt-5 sm:mt-6">
                         <div className="relative my-4 sm:my-6">
                             <div className="absolute inset-0 flex items-center">
@@ -203,7 +191,6 @@ const Login = () => {
                                 <span className="px-3 sm:px-4 bg-white text-gray-500">or continue with</span>
                             </div>
                         </div>
-
                         <div className="flex justify-center">
                             <button
                                 type="button"
@@ -233,7 +220,6 @@ const Login = () => {
                         </div>
                     </div>
                 </div>
-
                 <p className="text-center text-white text-sm sm:text-base mt-5 sm:mt-6 px-4">
                     Don't have an account?{' '}
                     <Link

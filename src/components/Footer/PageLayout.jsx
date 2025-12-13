@@ -11,7 +11,7 @@ export const PageLayout = ({ title, children }) => {
                 <div className="mt-8">
                     <button
                         onClick={() => window.history.back()}
-                        className="text-purple-600 hover:text-purple-700 font-medium"
+                        className="text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
                     >
                         ← Back to Home
                     </button>

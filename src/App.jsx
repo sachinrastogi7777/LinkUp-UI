@@ -16,9 +16,22 @@ import useSocketStatus from "./utils/customHooks/useSocketStatus";
 import ChatPage from "./components/Chat/ChatPage";
 import useChatsGlobal from "./utils/customHooks/useChatsGlobal";
 import AuthCallback from "./components/Auth/AuthCallback";
-import PrivacyPolicy from "./components/Footer/PrivacyPolicy";
-import TermsOfService from "./components/Footer/TermsOfService";
-import { AboutUs } from "./components/Footer/About";
+import PrivacyPolicy from "./components/Footer/Legal/PrivacyPolicy";
+import TermsOfService from "./components/Footer/Legal/TermsOfService";
+import { AboutUs } from "./components/Footer/CompanyPages/About";
+import { DeveloperForum } from "./components/Footer/Community/DeveloperForum";
+import { Events } from "./components/Footer/Community/Events"
+import { Partnerships } from "./components/Footer/Community/Partnerships";
+import { SuccessStories } from "./components/Footer/Community/SuccessStories";
+import { Blog } from "./components/Footer/CompanyPages/Blog";
+import { Careers } from "./components/Footer/CompanyPages/Careers";
+import { Press } from "./components/Footer/CompanyPages/Press";
+import { CookiePolicy } from "./components/Footer/Legal/CookiePolicy";
+import { CommunityGuidelines } from "./components/Footer/Legal/CommunityGuidelines";
+import { HelpCenter } from "./components/Footer/Support/HelpCenter";
+import { SafetyTips } from "./components/Footer/Support/SafetyTips";
+import { ContactUs } from "./components/Footer/Support/ContactUs";
+import { FAQs } from "./components/Footer/Support/Faq";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -43,9 +56,22 @@ const AppContent = () => {
 					<Route path='/chats' element={<ChatPage />} />
 				</Route>
 				<Route path='/auth/callback' element={<AuthCallback />} />
+				<Route path='/about' element={<AboutUs />} />
+				<Route path='/careers' element={<Careers />} />
+				<Route path='/press' element={<Press />} />
+				<Route path='/blog' element={<Blog />} />
+				<Route path='/help-center' element={<HelpCenter />} />
+				<Route path='/safety-tips' element={<SafetyTips />} />
+				<Route path='/contact' element={<ContactUs />} />
+				<Route path='/faq' element={<FAQs />} />
 				<Route path='/privacy-policy' element={<PrivacyPolicy />} />
 				<Route path='/terms-service' element={<TermsOfService />} />
-				<Route path='/about' element={<AboutUs />} />
+				<Route path='/cookies-policy' element={<CookiePolicy />} />
+				<Route path='/community-guidelines' element={<CommunityGuidelines />} />
+				<Route path='/success-stories' element={<SuccessStories />} />
+				<Route path='/events' element={<Events />} />
+				<Route path='/developer-forum' element={<DeveloperForum />} />
+				<Route path='/partnerships' element={<Partnerships />} />
 			</Routes>
 		</BrowserRouter>
 	);

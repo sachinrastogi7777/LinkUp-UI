@@ -1,5 +1,5 @@
 import React from "react";
-import { PageLayout } from "./PageLayout";
+import { PageLayout } from "../PageLayout";
 
 export const AboutUs = () => (
     <PageLayout title="About Us">

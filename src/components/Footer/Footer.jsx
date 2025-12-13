@@ -18,22 +18,22 @@ const Footer = () => {
             { name: 'Blog', path: '/blog' }
         ],
         support: [
-            { name: 'Help Center', path: '/help' },
-            { name: 'Safety Tips', path: '/safety' },
+            { name: 'Help Center', path: '/help-center' },
+            { name: 'Safety Tips', path: '/safety-tips' },
             { name: 'Contact Us', path: '/contact' },
             { name: 'FAQs', path: '/faq' }
         ],
         legal: [
             { name: 'Privacy Policy', path: '/privacy-policy' },
             { name: 'Terms of Service', path: '/terms-service' },
-            { name: 'Cookie Policy', path: '/cookies' },
-            { name: 'Community Guidelines', path: '/guidelines' }
+            { name: 'Cookie Policy', path: '/cookies-policy' },
+            { name: 'Community Guidelines', path: '/community-guidelines' }
         ],
         community: [
-            { name: 'Success Stories', path: '/stories' },
+            { name: 'Success Stories', path: '/success-stories' },
             { name: 'Events', path: '/events' },
-            { name: 'Developer Forum', path: '/forum' },
-            { name: 'Partnerships', path: '/partners' }
+            { name: 'Developer Forum', path: '/developer-forum' },
+            { name: 'Partnerships', path: '/partnerships' }
         ]
     };
 
@@ -265,7 +265,7 @@ const Footer = () => {
                             </Link>
                             <a href="#" className="hover:text-white transition-colors flex items-center gap-1">
                                 <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                                <span className="hidden xs:inline">Community</span>
+                                <span>Community</span>
                             </a>
                         </div>
 
