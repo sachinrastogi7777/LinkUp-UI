@@ -32,6 +32,8 @@ import { HelpCenter } from "./components/Footer/Support/HelpCenter";
 import { SafetyTips } from "./components/Footer/Support/SafetyTips";
 import { ContactUs } from "./components/Footer/Support/ContactUs";
 import { FAQs } from "./components/Footer/Support/Faq";
+import { CancellationRefund } from "./components/Footer/CompanyPages/RefundPolicy";
+import { ShippingDelivery } from "./components/Footer/CompanyPages/ShippingDelivery";
 
 const AppContent = () => {
 	const user = useSelector((store) => store.user);
@@ -60,6 +62,8 @@ const AppContent = () => {
 				<Route path='/careers' element={<Careers />} />
 				<Route path='/press' element={<Press />} />
 				<Route path='/blog' element={<Blog />} />
+				<Route path='/refund-policy' element={<CancellationRefund />} />
+				<Route path='/shipping-delivery' element={<ShippingDelivery />} />
 				<Route path='/help-center' element={<HelpCenter />} />
 				<Route path='/safety-tips' element={<SafetyTips />} />
 				<Route path='/contact' element={<ContactUs />} />
